@@ -40,9 +40,18 @@ export default function PlayPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [guestPlayerId, setGuestPlayerId] = useState<Id<"players"> | null>(null);
 
   const streakTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const gameStartedAtRef = useRef<number | null>(null);
+
+  // Check for guest player ID in localStorage
+  useEffect(() => {
+    const storedPlayerId = localStorage.getItem(`blindcode_player_${code}`);
+    if (storedPlayerId) {
+      setGuestPlayerId(storedPlayerId as Id<"players">);
+    }
+  }, [code]);
 
   const game = useQuery(api.games.getGameByShortCode, { shortCode: code });
   const assets = useQuery(
@@ -50,13 +59,24 @@ export default function PlayPage() {
     game?._id ? { gameId: game._id } : "skip"
   );
 
-  // Get player and entry
-  const player = useQuery(
+  // Get player by user ID (for logged-in users)
+  const playerByUser = useQuery(
     api.players.getPlayerByUserAndGame,
     game?._id && user?.id
       ? { userId: user.id as Id<"users">, gameId: game._id }
       : "skip"
   );
+
+  // Get player by stored ID (for guest users)
+  const playerById = useQuery(
+    api.players.getPlayerById,
+    guestPlayerId && !user?.id
+      ? { playerId: guestPlayerId }
+      : "skip"
+  );
+
+  // Use whichever player we found
+  const player = playerByUser || playerById;
 
   const entry = useQuery(
     api.entries.getPlayerEntry,

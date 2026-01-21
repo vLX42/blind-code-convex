@@ -108,3 +108,11 @@ export const getActivePlayerCount = query({
     return players.length;
   },
 });
+
+// Get player by ID
+export const getPlayerById = query({
+  args: { playerId: v.id("players") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.playerId);
+  },
+});
