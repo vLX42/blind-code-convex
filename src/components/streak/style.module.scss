@@ -1,0 +1,69 @@
+.powerMode {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 40px;
+  font-family: 'Press Start 2P', monospace;
+  color: #0df;
+  margin: 0;
+  z-index: 200;
+  text-shadow: 0 0 20px #0df, 0 0 40px #0df;
+  animation: powerPulse 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes powerPulse {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+  100% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+}
+
+.streak {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 100;
+  text-align: right;
+  overflow: visible;
+
+  h1 {
+    font-size: 10px;
+    font-family: 'Press Start 2P', monospace;
+    color: #ff6b6b;
+    margin: 0 0 4px 0;
+    text-transform: uppercase;
+  }
+  h2 {
+    font-size: 48px;
+    font-family: 'Press Start 2P', monospace;
+    color: #4effa1;
+    padding: 0;
+    margin: 0;
+    text-shadow: 3px 3px 0 #2d7a50, 0 0 20px rgba(78, 255, 161, 0.5);
+  }
+
+  ul {
+    font-size: 10px;
+    font-family: 'Press Start 2P', monospace;
+    list-style: none;
+    padding: 0;
+    margin: 4px 0 0 0;
+    display: flex;
+    color: #4effa1;
+    flex-direction: column;
+    align-items: flex-end;
+    li {
+      margin: 0;
+    }
+  }
+  .timer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding-top: 4px;
+  }
+  .timerInner {
+    background-color: #4effa1;
+    opacity: 0.5;
+    height: 6px;
+  }
+}

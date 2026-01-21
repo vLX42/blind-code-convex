@@ -1,0 +1,63 @@
+.Button {
+  padding: 12px 20px;
+  font-family: 'Press Start 2P', sans-serif;
+  font-size: 10px;
+  color: white;
+  cursor: pointer;
+  background-color: #3a9364;
+  border: none;
+  appearance: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+  transition: all 0.1s ease;
+
+  // 8-bit pixel border effect
+  box-shadow:
+    4px 0 0 0 #2d7a50,
+    0 4px 0 0 #2d7a50,
+    4px 4px 0 0 #2d7a50,
+    -2px 0 0 0 #4ade80,
+    0 -2px 0 0 #4ade80,
+    -2px -2px 0 0 #4ade80;
+
+  &:focus {
+    border: none;
+    outline: none;
+  }
+
+  &:hover {
+    background-color: #4ade80;
+    color: #0a0a12;
+    transform: translate(-2px, -2px);
+    box-shadow:
+      6px 0 0 0 #2d7a50,
+      0 6px 0 0 #2d7a50,
+      6px 6px 0 0 #2d7a50,
+      -2px 0 0 0 #6bff9f,
+      0 -2px 0 0 #6bff9f,
+      -2px -2px 0 0 #6bff9f;
+  }
+
+  &:active {
+    transform: translate(2px, 2px);
+    box-shadow:
+      2px 0 0 0 #2d7a50,
+      0 2px 0 0 #2d7a50,
+      2px 2px 0 0 #2d7a50;
+  }
+
+  &:disabled {
+    background-color: #444;
+    color: #888;
+    cursor: not-allowed;
+    box-shadow:
+      4px 0 0 0 #333,
+      0 4px 0 0 #333,
+      4px 4px 0 0 #333;
+
+    &:hover {
+      transform: none;
+    }
+  }
+}

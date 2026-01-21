@@ -1,0 +1,96 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 198;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(2px);
+  }
+
+  .modal {
+    position: relative;
+    z-index: 199;
+    width: 80vw;
+    max-width: 700px;
+    max-height: 80vh;
+    margin: 0 auto;
+  }
+
+  .close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 8px 12px;
+    border: 0;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    font-weight: bolder;
+    -webkit-appearance: none;
+    background: #1a1a2e;
+    color: #ff6b6b;
+    cursor: pointer;
+    box-shadow:
+      4px 0 0 0 #0f0f1a,
+      0 4px 0 0 #0f0f1a,
+      4px 4px 0 0 #0f0f1a;
+    transition: all 0.1s;
+
+    &:hover {
+      background: #ff6b6b;
+      color: #1a1a2e;
+    }
+  }
+
+  .body {
+    padding: 1.5rem;
+    background-color: #0a0a12;
+    color: #e0e0e0;
+    height: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    display: flex;
+    font-family: 'Press Start 2P', monospace;
+
+    // Pixel border effect (8-bit style)
+    border: 4px solid #3a9364;
+    box-shadow:
+      8px 0 0 0 #2d7a50,
+      0 8px 0 0 #2d7a50,
+      8px 8px 0 0 #2d7a50,
+      -4px 0 0 0 #4ade80,
+      0 -4px 0 0 #4ade80,
+      -4px -4px 0 0 #4ade80,
+      inset 0 0 40px rgba(58, 147, 100, 0.1);
+
+    // Scanline effect
+    background-image:
+      linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%),
+      linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.03));
+    background-size: 100% 4px, 3px 100%;
+
+    img {
+      margin: auto;
+      image-rendering: pixelated;
+    }
+
+    // Custom scrollbar for arcade feel
+    &::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #1a1a2e;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #3a9364;
+      border: 2px solid #1a1a2e;
+    }
+  }
