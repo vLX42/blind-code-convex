@@ -152,6 +152,58 @@ export const endGame = mutation({
   },
 });
 
+// Auto-end game if time has expired (can be called by anyone)
+export const autoEndGameIfTimeUp = mutation({
+  args: {
+    gameId: v.id("games"),
+  },
+  handler: async (ctx, args) => {
+    const game = await ctx.db.get(args.gameId);
+    if (!game) {
+      throw new Error("Game not found");
+    }
+
+    // Only transition if game is active
+    if (game.status !== "active") {
+      return { transitioned: false, reason: "Game not active" };
+    }
+
+    // Check if time has actually expired
+    if (!game.startedAt || !game.durationMinutes) {
+      return { transitioned: false, reason: "No start time or duration" };
+    }
+
+    const elapsed = Date.now() - game.startedAt;
+    const totalDuration = game.durationMinutes * 60 * 1000;
+
+    if (elapsed < totalDuration) {
+      return { transitioned: false, reason: "Time not yet expired" };
+    }
+
+    // Time has expired - auto-submit all entries and transition to voting
+    const entries = await ctx.db
+      .query("entries")
+      .withIndex("by_game", (q) => q.eq("gameId", args.gameId))
+      .collect();
+
+    for (const entry of entries) {
+      if (!entry.isSubmitted) {
+        await ctx.db.patch(entry._id, {
+          isSubmitted: true,
+          submittedAt: Date.now(),
+        });
+      }
+    }
+
+    await ctx.db.patch(args.gameId, {
+      status: "voting",
+      endedAt: Date.now(),
+    });
+
+    return { transitioned: true };
+  },
+});
+
 // Finish voting and mark game as finished
 export const finishGame = mutation({
   args: {
