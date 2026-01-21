@@ -32,7 +32,9 @@ export default function GameManagePage() {
   const deleteGame = useMutation(api.games.deleteGame);
 
   const [newAssetName, setNewAssetName] = useState("");
-  const [newAssetType, setNewAssetType] = useState<"image" | "font" | "other">("image");
+  const [newAssetType, setNewAssetType] = useState<"image" | "font" | "other">(
+    "image",
+  );
   const [isUploading, setIsUploading] = useState(false);
   const assetFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -50,7 +52,11 @@ export default function GameManagePage() {
   });
 
   // Playback state
-  const [playbackEntry, setPlaybackEntry] = useState<{ id: Id<"entries">; playerName: string; autoPlay?: boolean } | null>(null);
+  const [playbackEntry, setPlaybackEntry] = useState<{
+    id: Id<"entries">;
+    playerName: string;
+    autoPlay?: boolean;
+  } | null>(null);
 
   // Delete state
   const [isDeleting, setIsDeleting] = useState(false);
@@ -61,7 +67,9 @@ export default function GameManagePage() {
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editReferenceImageUrl, setEditReferenceImageUrl] = useState("");
-  const [editHexColors, setEditHexColors] = useState<{ name: string; hex: string }[]>([]);
+  const [editHexColors, setEditHexColors] = useState<
+    { name: string; hex: string }[]
+  >([]);
   const [editRequirements, setEditRequirements] = useState("");
   const [editDuration, setEditDuration] = useState(15);
   const [isSaving, setIsSaving] = useState(false);
@@ -72,7 +80,11 @@ export default function GameManagePage() {
       setEditTitle(game.title);
       setEditDescription(game.description);
       setEditReferenceImageUrl(game.referenceImageUrl);
-      setEditHexColors(game.hexColors.length > 0 ? [...game.hexColors] : [{ name: "", hex: "" }]);
+      setEditHexColors(
+        game.hexColors.length > 0
+          ? [...game.hexColors]
+          : [{ name: "", hex: "" }],
+      );
       setEditRequirements(game.requirements || "");
       setEditDuration(game.durationMinutes);
     }
@@ -96,16 +108,33 @@ export default function GameManagePage() {
             <>
               <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
               <h1 className="text-2xl font-bold mb-4">Deleting Game...</h1>
-              <p className="text-gray-400">Removing all data and uploaded files</p>
+              <p className="text-gray-400">
+                Removing all data and uploaded files
+              </p>
             </>
           ) : (
             <>
-              <svg className="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="w-16 h-16 text-gray-600 mx-auto mb-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
               <h1 className="text-2xl font-bold mb-2">Game Not Found</h1>
-              <p className="text-gray-400 mb-6">This game may have been deleted or doesn&apos;t exist.</p>
-              <Link href="/" className="px-6 py-3 bg-green-600 hover:bg-green-500 rounded-lg inline-block">
+              <p className="text-gray-400 mb-6">
+                This game may have been deleted or doesn&apos;t exist.
+              </p>
+              <Link
+                href="/"
+                className="px-6 py-3 bg-green-600 hover:bg-green-500 rounded-lg inline-block"
+              >
                 Go Home
               </Link>
             </>
@@ -121,8 +150,13 @@ export default function GameManagePage() {
       <div className="min-h-screen flex items-center justify-center bg-gray-950">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
-          <p className="text-gray-400 mb-6">Only the game creator can manage this game.</p>
-          <Link href={`/game/${game.shortCode}`} className="px-6 py-3 bg-green-600 hover:bg-green-500 rounded-lg">
+          <p className="text-gray-400 mb-6">
+            Only the game creator can manage this game.
+          </p>
+          <Link
+            href={`/game/${game.shortCode}`}
+            className="px-6 py-3 bg-green-600 hover:bg-green-500 rounded-lg"
+          >
             Go to Lobby
           </Link>
         </div>
@@ -150,7 +184,9 @@ export default function GameManagePage() {
     }
   };
 
-  const handleAssetFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAssetFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -169,7 +205,11 @@ export default function GameManagePage() {
   // Edit mode handlers
   const handleSaveChanges = async () => {
     if (!user?.id) return;
-    if (!editTitle.trim() || !editDescription.trim() || !editReferenceImageUrl) {
+    if (
+      !editTitle.trim() ||
+      !editDescription.trim() ||
+      !editReferenceImageUrl
+    ) {
       alert("Please fill in all required fields");
       return;
     }
@@ -182,7 +222,9 @@ export default function GameManagePage() {
         title: editTitle.trim(),
         description: editDescription.trim(),
         referenceImageUrl: editReferenceImageUrl,
-        hexColors: editHexColors.filter((c) => c.name.trim() !== "" && c.hex.trim() !== ""),
+        hexColors: editHexColors.filter(
+          (c) => c.name.trim() !== "" && c.hex.trim() !== "",
+        ),
         requirements: editRequirements.trim() || undefined,
         durationMinutes: editDuration,
       });
@@ -199,7 +241,8 @@ export default function GameManagePage() {
     setIsEditing(false);
   };
 
-  const addColor = () => setEditHexColors([...editHexColors, { name: "", hex: "" }]);
+  const addColor = () =>
+    setEditHexColors([...editHexColors, { name: "", hex: "" }]);
   const updateColorName = (index: number, name: string) => {
     const newColors = [...editHexColors];
     const color = newColors[index];
@@ -270,9 +313,10 @@ export default function GameManagePage() {
     }
   };
 
-  const shareUrl = typeof window !== "undefined"
-    ? `${window.location.origin}/game/${game.shortCode}`
-    : "";
+  const shareUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/game/${game.shortCode}`
+      : "";
 
   const copyShareUrl = () => {
     navigator.clipboard.writeText(shareUrl);
@@ -283,8 +327,11 @@ export default function GameManagePage() {
       {/* Header */}
       <header className="border-b-4 border-[#3a9364] bg-[#0a0a12] sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-lg font-['Press_Start_2P'] text-[#4ade80]"
-            style={{ textShadow: '2px 2px 0 #2d7a50' }}>
+          <Link
+            href="/"
+            className="text-lg font-['Press_Start_2P'] text-[#4ade80]"
+            style={{ textShadow: "2px 2px 0 #2d7a50" }}
+          >
             BLIND CODE
           </Link>
           <Link
@@ -298,20 +345,35 @@ export default function GameManagePage() {
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Game Status & Controls */}
-        <div className="bg-[#0a0a12] border-4 border-[#3a9364] p-6 mb-8"
-          style={{ boxShadow: '6px 6px 0 0 #2d7a50' }}>
+        <div
+          className="bg-[#0a0a12] border-4 border-[#3a9364] p-6 mb-8"
+          style={{ boxShadow: "6px 6px 0 0 #2d7a50" }}
+        >
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-xl font-['Press_Start_2P'] text-[#4ade80] mb-3"
-                style={{ textShadow: '2px 2px 0 #2d7a50' }}>{game.title}</h1>
+              <h1
+                className="text-xl font-['Press_Start_2P'] text-[#4ade80] mb-3"
+                style={{ textShadow: "2px 2px 0 #2d7a50" }}
+              >
+                {game.title}
+              </h1>
               <p className="text-[10px] font-['Press_Start_2P']">
-                Status: <span className={`${
-                  game.status === "draft" ? "text-gray-400" :
-                  game.status === "lobby" ? "text-yellow-400" :
-                  game.status === "active" ? "text-[#4ade80]" :
-                  game.status === "voting" ? "text-purple-400" :
-                  "text-gray-400"
-                }`}>{game.status.toUpperCase()}</span>
+                Status:{" "}
+                <span
+                  className={`${
+                    game.status === "draft"
+                      ? "text-gray-400"
+                      : game.status === "lobby"
+                        ? "text-yellow-400"
+                        : game.status === "active"
+                          ? "text-[#4ade80]"
+                          : game.status === "voting"
+                            ? "text-purple-400"
+                            : "text-gray-400"
+                  }`}
+                >
+                  {game.status.toUpperCase()}
+                </span>
               </p>
             </div>
 
@@ -320,7 +382,7 @@ export default function GameManagePage() {
                 <button
                   onClick={() => setIsEditing(true)}
                   className="px-4 py-2 bg-[#1a1a2e] hover:bg-[#2a2a4e] font-['Press_Start_2P'] text-[8px] uppercase transition border-2 border-gray-600"
-                  style={{ boxShadow: '3px 3px 0 0 #333' }}
+                  style={{ boxShadow: "3px 3px 0 0 #333" }}
                 >
                   Edit
                 </button>
@@ -329,7 +391,7 @@ export default function GameManagePage() {
                 <button
                   onClick={handleOpenLobby}
                   className="px-4 py-2 bg-yellow-600 hover:bg-yellow-500 font-['Press_Start_2P'] text-[8px] uppercase transition"
-                  style={{ boxShadow: '3px 3px 0 0 #997700' }}
+                  style={{ boxShadow: "3px 3px 0 0 #997700" }}
                 >
                   Open Lobby
                 </button>
@@ -338,7 +400,7 @@ export default function GameManagePage() {
                 <button
                   onClick={handleStartGame}
                   className="px-4 py-2 bg-[#3a9364] hover:bg-[#4ade80] hover:text-[#0a0a12] font-['Press_Start_2P'] text-[8px] uppercase transition"
-                  style={{ boxShadow: '3px 3px 0 0 #2d7a50' }}
+                  style={{ boxShadow: "3px 3px 0 0 #2d7a50" }}
                 >
                   Start Game
                 </button>
@@ -347,7 +409,7 @@ export default function GameManagePage() {
                 <button
                   onClick={handleEndGame}
                   className="px-4 py-2 bg-purple-600 hover:bg-purple-500 font-['Press_Start_2P'] text-[8px] uppercase transition"
-                  style={{ boxShadow: '3px 3px 0 0 #553399' }}
+                  style={{ boxShadow: "3px 3px 0 0 #553399" }}
                 >
                   End & Vote
                 </button>
@@ -356,7 +418,7 @@ export default function GameManagePage() {
                 <button
                   onClick={handleFinishGame}
                   className="px-4 py-2 bg-gray-600 hover:bg-gray-500 font-['Press_Start_2P'] text-[8px] uppercase transition"
-                  style={{ boxShadow: '3px 3px 0 0 #333' }}
+                  style={{ boxShadow: "3px 3px 0 0 #333" }}
                 >
                   Finish
                 </button>
@@ -364,7 +426,7 @@ export default function GameManagePage() {
               <button
                 onClick={() => setShowDeleteConfirm(true)}
                 className="px-4 py-2 bg-[#1a1a2e] hover:bg-[#ff6b6b] text-[#ff6b6b] hover:text-white font-['Press_Start_2P'] text-[8px] uppercase transition border-2 border-[#ff6b6b]"
-                style={{ boxShadow: '3px 3px 0 0 #993333' }}
+                style={{ boxShadow: "3px 3px 0 0 #993333" }}
               >
                 Delete
               </button>
@@ -373,7 +435,9 @@ export default function GameManagePage() {
 
           {/* Share Link */}
           <div className="bg-[#1a1a2e] border-2 border-[#3a9364] p-4">
-            <label className="block text-[10px] font-['Press_Start_2P'] text-[#ff6b6b] mb-3">Share Link</label>
+            <label className="block text-[10px] font-['Press_Start_2P'] text-[#ff6b6b] mb-3">
+              Share Link
+            </label>
             <div className="flex gap-2">
               <input
                 type="text"
@@ -384,7 +448,7 @@ export default function GameManagePage() {
               <button
                 onClick={copyShareUrl}
                 className="px-4 py-2 bg-[#3a9364] hover:bg-[#4ade80] hover:text-[#0a0a12] font-['Press_Start_2P'] text-[8px] uppercase transition"
-                style={{ boxShadow: '3px 3px 0 0 #2d7a50' }}
+                style={{ boxShadow: "3px 3px 0 0 #2d7a50" }}
               >
                 Copy
               </button>
@@ -397,12 +461,18 @@ export default function GameManagePage() {
 
         {/* Edit Game Form */}
         {isEditing && (
-          <div className="bg-[#0a0a12] border-4 border-[#3a9364] p-6 mb-8"
-            style={{ boxShadow: '6px 6px 0 0 #2d7a50' }}>
-            <h2 className="text-sm font-['Press_Start_2P'] text-[#ff6b6b] mb-6">{">> Edit Game"}</h2>
+          <div
+            className="bg-[#0a0a12] border-4 border-[#3a9364] p-6 mb-8"
+            style={{ boxShadow: "6px 6px 0 0 #2d7a50" }}
+          >
+            <h2 className="text-sm font-['Press_Start_2P'] text-[#ff6b6b] mb-6">
+              {">> Edit Game"}
+            </h2>
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium mb-2">Game Title</label>
+                <label className="block text-sm font-medium mb-2">
+                  Game Title
+                </label>
                 <input
                   type="text"
                   value={editTitle}
@@ -412,7 +482,9 @@ export default function GameManagePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Description</label>
+                <label className="block text-sm font-medium mb-2">
+                  Description
+                </label>
                 <textarea
                   value={editDescription}
                   onChange={(e) => setEditDescription(e.target.value)}
@@ -422,7 +494,9 @@ export default function GameManagePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Reference Image</label>
+                <label className="block text-sm font-medium mb-2">
+                  Reference Image
+                </label>
                 <ImageUpload
                   endpoint="referenceImage"
                   onUploadComplete={setEditReferenceImageUrl}
@@ -431,7 +505,9 @@ export default function GameManagePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Color Palette</label>
+                <label className="block text-sm font-medium mb-2">
+                  Color Palette
+                </label>
                 <div className="space-y-3">
                   {editHexColors.map((color, index) => (
                     <div key={index} className="flex gap-2 items-center">
@@ -477,7 +553,9 @@ export default function GameManagePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Requirements (optional)</label>
+                <label className="block text-sm font-medium mb-2">
+                  Requirements (optional)
+                </label>
                 <textarea
                   value={editRequirements}
                   onChange={(e) => setEditRequirements(e.target.value)}
@@ -488,7 +566,9 @@ export default function GameManagePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Duration (minutes)</label>
+                <label className="block text-sm font-medium mb-2">
+                  Duration (minutes)
+                </label>
                 <input
                   type="number"
                   value={editDuration}
@@ -510,7 +590,7 @@ export default function GameManagePage() {
                   onClick={handleSaveChanges}
                   disabled={isSaving}
                   className="flex-1 px-4 py-3 bg-[#3a9364] hover:bg-[#4ade80] hover:text-[#0a0a12] font-['Press_Start_2P'] text-[10px] uppercase transition disabled:opacity-50"
-                  style={{ boxShadow: '4px 4px 0 0 #2d7a50' }}
+                  style={{ boxShadow: "4px 4px 0 0 #2d7a50" }}
                 >
                   {isSaving ? "Saving..." : "Save"}
                 </button>
@@ -521,18 +601,26 @@ export default function GameManagePage() {
 
         {/* Game Details (when not editing) */}
         {!isEditing && (
-          <div className="bg-[#0a0a12] border-4 border-[#3a9364] p-6 mb-8"
-            style={{ boxShadow: '6px 6px 0 0 #2d7a50' }}>
-            <h2 className="text-sm font-['Press_Start_2P'] text-[#ff6b6b] mb-6">{">> Game Details"}</h2>
+          <div
+            className="bg-[#0a0a12] border-4 border-[#3a9364] p-6 mb-8"
+            style={{ boxShadow: "6px 6px 0 0 #2d7a50" }}
+          >
+            <h2 className="text-sm font-['Press_Start_2P'] text-[#ff6b6b] mb-6">
+              {">> Game Details"}
+            </h2>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Description</label>
+                <label className="block text-xs text-gray-500 mb-1">
+                  Description
+                </label>
                 <p className="text-gray-300">{game.description}</p>
               </div>
 
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Reference Image</label>
+                <label className="block text-xs text-gray-500 mb-1">
+                  Reference Image
+                </label>
                 <img
                   src={game.referenceImageUrl}
                   alt="Reference"
@@ -542,17 +630,26 @@ export default function GameManagePage() {
 
               {game.hexColors.length > 0 && (
                 <div>
-                  <label className="block text-xs text-gray-500 mb-2">Color Palette</label>
+                  <label className="block text-xs text-gray-500 mb-2">
+                    Color Palette
+                  </label>
                   <div className="flex flex-wrap gap-2">
                     {game.hexColors.map((color, index) => (
-                      <div key={index} className="flex items-center gap-2 bg-gray-800 rounded-lg px-3 py-2">
+                      <div
+                        key={index}
+                        className="flex items-center gap-2 bg-gray-800 rounded-lg px-3 py-2"
+                      >
                         <div
                           className="w-6 h-6 rounded border border-gray-600"
                           style={{ backgroundColor: color.hex }}
                         />
                         <div className="flex flex-col">
-                          <span className="text-xs text-gray-300">{color.name}</span>
-                          <code className="text-xs text-gray-500">{color.hex}</code>
+                          <span className="text-xs text-gray-300">
+                            {color.name}
+                          </span>
+                          <code className="text-xs text-gray-500">
+                            {color.hex}
+                          </code>
                         </div>
                       </div>
                     ))}
@@ -562,13 +659,19 @@ export default function GameManagePage() {
 
               {game.requirements && (
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">Requirements</label>
-                  <p className="text-gray-300 whitespace-pre-wrap">{game.requirements}</p>
+                  <label className="block text-xs text-gray-500 mb-1">
+                    Requirements
+                  </label>
+                  <p className="text-gray-300 whitespace-pre-wrap">
+                    {game.requirements}
+                  </p>
                 </div>
               )}
 
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Duration</label>
+                <label className="block text-xs text-gray-500 mb-1">
+                  Duration
+                </label>
                 <p className="text-gray-300">{game.durationMinutes} minutes</p>
               </div>
             </div>
@@ -576,35 +679,58 @@ export default function GameManagePage() {
         )}
 
         {/* Players */}
-        <div className="bg-[#0a0a12] border-4 border-[#3a9364] p-6 mb-8"
-          style={{ boxShadow: '6px 6px 0 0 #2d7a50' }}>
+        <div
+          className="bg-[#0a0a12] border-4 border-[#3a9364] p-6 mb-8"
+          style={{ boxShadow: "6px 6px 0 0 #2d7a50" }}
+        >
           <h2 className="text-sm font-['Press_Start_2P'] text-[#ff6b6b] mb-6">
-            {">> Players"} <span className="text-[#4ade80]">({players?.filter(p => p.isActive).length || 0})</span>
+            {">> Players"}{" "}
+            <span className="text-[#4ade80]">
+              ({players?.filter((p) => p.isActive).length || 0})
+            </span>
           </h2>
           {players && players.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {players.filter(p => p.isActive).map((player) => (
-                <div key={player._id} className="bg-[#1a1a2e] border-2 border-[#3a9364] px-4 py-3 flex items-center gap-3">
-                  {player.user?.avatarUrl ? (
-                    <img src={player.user.avatarUrl} alt={player.handle} className="w-8 h-8 border-2 border-[#3a9364]" style={{ imageRendering: 'pixelated' }} />
-                  ) : (
-                    <div className="w-8 h-8 bg-[#3a9364] flex items-center justify-center text-sm font-['Press_Start_2P'] text-[#0a0a12]">
-                      {player.handle[0]?.toUpperCase()}
-                    </div>
-                  )}
-                  <span className="text-xs font-['Press_Start_2P'] text-[#4ade80] truncate">{player.handle}</span>
-                </div>
-              ))}
+              {players
+                .filter((p) => p.isActive)
+                .map((player) => (
+                  <div
+                    key={player._id}
+                    className="bg-[#1a1a2e] border-2 border-[#3a9364] px-4 py-3 flex items-center gap-3"
+                  >
+                    {player.user?.avatarUrl ? (
+                      <img
+                        src={player.user.avatarUrl}
+                        alt={player.handle}
+                        className="w-8 h-8 border-2 border-[#3a9364]"
+                        style={{ imageRendering: "pixelated" }}
+                      />
+                    ) : (
+                      <div className="w-8 h-8 bg-[#3a9364] flex items-center justify-center text-sm font-['Press_Start_2P'] text-[#0a0a12]">
+                        {player.handle[0]?.toUpperCase()}
+                      </div>
+                    )}
+                    <span className="text-xs font-['Press_Start_2P'] text-[#4ade80] truncate">
+                      {player.handle}
+                    </span>
+                  </div>
+                ))}
             </div>
           ) : (
-            <p className="text-[10px] font-['Press_Start_2P'] text-gray-500">No players yet. Share the link!</p>
+            <p className="text-[10px] font-['Press_Start_2P'] text-gray-500">
+              No players yet. Share the link!
+            </p>
           )}
         </div>
 
         {/* Assets Management */}
-        <div className="bg-[#0a0a12] border-4 border-[#3a9364] p-6 mb-8"
-          style={{ boxShadow: '6px 6px 0 0 #2d7a50' }}>
-          <h2 className="text-sm font-['Press_Start_2P'] text-[#ff6b6b] mb-6">{">> Assets"}</h2>
+        <div
+          className="bg-[#0a0a12] border-4 border-[#3a9364] p-6 mb-8"
+          style={{ boxShadow: "6px 6px 0 0 #2d7a50" }}
+        >
+          <h2 className="text-sm font-['Press_Start_2P'] text-[#ff6b6b] mb-6">
+            {">> Assets"}
+          </h2>
 
           {/* Add Asset Form */}
           <div className="mb-6">
@@ -618,15 +744,19 @@ export default function GameManagePage() {
               />
               <select
                 value={newAssetType}
-                onChange={(e) => setNewAssetType(e.target.value as "image" | "font" | "other")}
+                onChange={(e) =>
+                  setNewAssetType(e.target.value as "image" | "font" | "other")
+                }
                 className="w-28 bg-[#1a1a2e] border-2 border-[#3a9364] px-4 py-2 text-sm focus:outline-none focus:border-[#4ade80]"
               >
                 <option value="image">Image</option>
                 <option value="font">Font</option>
                 <option value="other">Other</option>
               </select>
-              <label className="inline-flex items-center gap-2 px-4 py-2 bg-[#3a9364] hover:bg-[#4ade80] hover:text-[#0a0a12] cursor-pointer transition font-['Press_Start_2P'] text-[8px] uppercase"
-                style={{ boxShadow: '3px 3px 0 0 #2d7a50' }}>
+              <label
+                className="inline-flex items-center gap-2 px-4 py-2 bg-[#3a9364] hover:bg-[#4ade80] hover:text-[#0a0a12] cursor-pointer transition font-['Press_Start_2P'] text-[8px] uppercase"
+                style={{ boxShadow: "3px 3px 0 0 #2d7a50" }}
+              >
                 <input
                   ref={assetFileInputRef}
                   type="file"
@@ -650,13 +780,20 @@ export default function GameManagePage() {
           {assets && assets.length > 0 ? (
             <div className="space-y-2">
               {assets.map((asset) => (
-                <div key={asset._id} className="flex items-center justify-between bg-[#1a1a2e] border-2 border-[#3a9364] px-4 py-3">
+                <div
+                  key={asset._id}
+                  className="flex items-center justify-between bg-[#1a1a2e] border-2 border-[#3a9364] px-4 py-3"
+                >
                   <div className="flex items-center gap-4">
-                    <span className="text-xs font-['Press_Start_2P'] text-[#4ade80]">{asset.name}</span>
+                    <span className="text-xs font-['Press_Start_2P'] text-[#4ade80]">
+                      {asset.name}
+                    </span>
                     <code className="text-[10px] text-[#0df] bg-[#0a0a12] px-2 py-1 border border-[#0df]">
                       /a/{asset.shortCode}
                     </code>
-                    <span className="text-[10px] text-gray-500">{asset.type}</span>
+                    <span className="text-[10px] text-gray-500">
+                      {asset.type}
+                    </span>
                   </div>
                   <div className="flex items-center gap-3">
                     <a
@@ -678,7 +815,9 @@ export default function GameManagePage() {
               ))}
             </div>
           ) : (
-            <p className="text-[10px] font-['Press_Start_2P'] text-gray-500">No assets. Add images/fonts for players.</p>
+            <p className="text-[10px] font-['Press_Start_2P'] text-gray-500">
+              No assets. Add images/fonts for players.
+            </p>
           )}
 
           <p className="mt-4 text-[8px] font-['Press_Start_2P'] text-gray-500">
@@ -687,43 +826,74 @@ export default function GameManagePage() {
         </div>
 
         {/* Entries (for voting stage) */}
-        {(game.status === "voting" || game.status === "finished") && entries && entries.length > 0 && (
-          <div className="bg-[#0a0a12] border-4 border-[#3a9364] p-6"
-            style={{ boxShadow: '6px 6px 0 0 #2d7a50' }}>
-            <h2 className="text-sm font-['Press_Start_2P'] text-[#ff6b6b] mb-6">{">> Submissions"}</h2>
-            <div className="space-y-4">
-              {entries.map((entry) => (
-                <div key={entry._id} className="bg-[#1a1a2e] border-2 border-[#3a9364] p-4">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
-                    <span className="text-xs font-['Press_Start_2P'] text-[#4ade80]">{entry.player?.handle}</span>
-                    <div className="flex flex-wrap items-center gap-4 text-[8px] font-['Press_Start_2P'] text-gray-400">
-                      <span>Score: <span className="text-[#4ade80]">{entry.totalScore}</span></span>
-                      <span>Streak: <span className="text-[#0df]">{entry.maxStreak}</span></span>
-                      <span>Keys: <span className="text-[#ff6b6b]">{entry.totalKeystrokes}</span></span>
-                      <button
-                        onClick={() => setPlaybackEntry({ id: entry._id, playerName: entry.player?.handle || "Unknown" })}
-                        className="px-3 py-1 bg-[#0df] text-[#0a0a12] hover:bg-white transition"
-                      >
-                        Playback
-                      </button>
+        {(game.status === "voting" || game.status === "finished") &&
+          entries &&
+          entries.length > 0 && (
+            <div
+              className="bg-[#0a0a12] border-4 border-[#3a9364] p-6"
+              style={{ boxShadow: "6px 6px 0 0 #2d7a50" }}
+            >
+              <h2 className="text-sm font-['Press_Start_2P'] text-[#ff6b6b] mb-6">
+                {">> Submissions"}
+              </h2>
+              <div className="space-y-4">
+                {entries.map((entry) => (
+                  <div
+                    key={entry._id}
+                    className="bg-[#1a1a2e] border-2 border-[#3a9364] p-4"
+                  >
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
+                      <span className="text-xs font-['Press_Start_2P'] text-[#4ade80]">
+                        {entry.player?.handle}
+                      </span>
+                      <div className="flex flex-wrap items-center gap-4 text-[8px] font-['Press_Start_2P'] text-gray-400">
+                        <span>
+                          Score:{" "}
+                          <span className="text-[#4ade80]">
+                            {entry.totalScore}
+                          </span>
+                        </span>
+                        <span>
+                          Streak:{" "}
+                          <span className="text-[#0df]">{entry.maxStreak}</span>
+                        </span>
+                        <span>
+                          Keys:{" "}
+                          <span className="text-[#ff6b6b]">
+                            {entry.totalKeystrokes}
+                          </span>
+                        </span>
+                        <button
+                          onClick={() =>
+                            setPlaybackEntry({
+                              id: entry._id,
+                              playerName: entry.player?.handle || "Unknown",
+                            })
+                          }
+                          className="px-3 py-1 bg-[#0df] text-[#0a0a12] hover:bg-white transition"
+                        >
+                          Playback
+                        </button>
+                      </div>
+                    </div>
+                    <div className="bg-[#0a0a12] border border-[#3a9364] p-3 max-h-40 overflow-auto">
+                      <pre className="text-xs text-gray-300 whitespace-pre-wrap font-mono">
+                        {entry.html || "(empty)"}
+                      </pre>
                     </div>
                   </div>
-                  <div className="bg-[#0a0a12] border border-[#3a9364] p-3 max-h-40 overflow-auto">
-                    <pre className="text-xs text-gray-300 whitespace-pre-wrap font-mono">{entry.html || "(empty)"}</pre>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            <Link
-              href={`/results/${game.shortCode}`}
-              className="mt-6 block text-center px-4 py-3 bg-purple-600 hover:bg-purple-500 font-['Press_Start_2P'] text-[10px] uppercase transition"
-              style={{ boxShadow: '4px 4px 0 0 #553399' }}
-            >
-              Results & Voting
-            </Link>
-          </div>
-        )}
+              <Link
+                href={`/results/${game.shortCode}`}
+                className="mt-6 block text-center px-4 py-3 bg-purple-600 hover:bg-purple-500 font-['Press_Start_2P'] text-[10px] uppercase transition"
+                style={{ boxShadow: "4px 4px 0 0 #553399" }}
+              >
+                Results & Voting
+              </Link>
+            </div>
+          )}
       </div>
 
       {/* Playback Modal */}
@@ -740,18 +910,28 @@ export default function GameManagePage() {
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#0a0a12] border-4 border-[#ff6b6b] max-w-md w-full p-6"
-            style={{ boxShadow: '8px 8px 0 0 #993333' }}>
-            <h2 className="text-sm font-['Press_Start_2P'] mb-6 text-[#ff6b6b]">{">> Delete Game"}</h2>
+          <div
+            className="bg-[#0a0a12] border-4 border-[#ff6b6b] max-w-md w-full p-6"
+            style={{ boxShadow: "8px 8px 0 0 #993333" }}
+          >
+            <h2 className="text-sm font-['Press_Start_2P'] mb-6 text-[#ff6b6b]">
+              {">> Delete Game"}
+            </h2>
             <p className="text-gray-300 text-sm mb-4">
-              Delete <span className="text-[#4ade80] font-['Press_Start_2P'] text-[10px]">{game.title}</span>?
+              Delete{" "}
+              <span className="text-[#4ade80] font-['Press_Start_2P'] text-[10px]">
+                {game.title}
+              </span>
+              ?
             </p>
             <ul className="text-[10px] font-['Press_Start_2P'] text-gray-500 mb-6 space-y-2">
               <li>- All submissions</li>
               <li>- All votes</li>
               <li>- All assets</li>
             </ul>
-            <p className="text-[10px] font-['Press_Start_2P'] text-[#ff6b6b] mb-6">Cannot be undone!</p>
+            <p className="text-[10px] font-['Press_Start_2P'] text-[#ff6b6b] mb-6">
+              Cannot be undone!
+            </p>
             <div className="flex gap-4">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
@@ -764,7 +944,7 @@ export default function GameManagePage() {
                 onClick={handleDeleteGame}
                 disabled={isDeleting}
                 className="flex-1 px-4 py-3 bg-[#ff6b6b] hover:bg-white text-[#0a0a12] font-['Press_Start_2P'] text-[10px] uppercase transition disabled:opacity-50"
-                style={{ boxShadow: '4px 4px 0 0 #993333' }}
+                style={{ boxShadow: "4px 4px 0 0 #993333" }}
               >
                 {isDeleting ? "..." : "Delete"}
               </button>

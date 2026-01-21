@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     if (!urls || !Array.isArray(urls)) {
       return NextResponse.json(
         { error: "urls array is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -39,7 +39,10 @@ export async function POST(request: NextRequest) {
       .filter((key): key is string => key !== null);
 
     if (fileKeys.length === 0) {
-      return NextResponse.json({ deleted: 0, message: "No valid file keys found" });
+      return NextResponse.json({
+        deleted: 0,
+        message: "No valid file keys found",
+      });
     }
 
     // Delete files from UploadThing
@@ -53,7 +56,7 @@ export async function POST(request: NextRequest) {
     console.error("Failed to delete files:", error);
     return NextResponse.json(
       { error: "Failed to delete files" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

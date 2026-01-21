@@ -6,7 +6,7 @@ import { Id } from "./_generated/dataModel";
 async function canUserVoteOnGame(
   ctx: MutationCtx,
   gameId: Id<"games">,
-  userId: Id<"users">
+  userId: Id<"users">,
 ): Promise<boolean> {
   const game = await ctx.db.get(gameId);
   if (!game) return false;
@@ -19,10 +19,7 @@ async function canUserVoteOnGame(
     .query("voteTokens")
     .withIndex("by_game", (q: any) => q.eq("gameId", gameId))
     .filter((q: any) =>
-      q.and(
-        q.eq(q.field("usedBy"), userId),
-        q.eq(q.field("isActive"), true)
-      )
+      q.and(q.eq(q.field("usedBy"), userId), q.eq(q.field("isActive"), true)),
     )
     .first();
 
@@ -48,7 +45,7 @@ export const castVote = mutation({
     const existing = await ctx.db
       .query("votes")
       .withIndex("by_judge_and_game", (q) =>
-        q.eq("judgeId", args.judgeId).eq("gameId", args.gameId)
+        q.eq("judgeId", args.judgeId).eq("gameId", args.gameId),
       )
       .filter((q) => q.eq(q.field("entryId"), args.entryId))
       .first();
@@ -102,7 +99,7 @@ export const getUserVotesForGame = query({
     return await ctx.db
       .query("votes")
       .withIndex("by_judge_and_game", (q) =>
-        q.eq("judgeId", args.userId).eq("gameId", args.gameId)
+        q.eq("judgeId", args.userId).eq("gameId", args.gameId),
       )
       .collect();
   },
@@ -126,7 +123,7 @@ export const selectWinner = mutation({
     const existingWinners = await ctx.db
       .query("votes")
       .withIndex("by_judge_and_game", (q) =>
-        q.eq("judgeId", args.judgeId).eq("gameId", args.gameId)
+        q.eq("judgeId", args.judgeId).eq("gameId", args.gameId),
       )
       .filter((q) => q.eq(q.field("isWinner"), true))
       .collect();
@@ -139,7 +136,7 @@ export const selectWinner = mutation({
     const existing = await ctx.db
       .query("votes")
       .withIndex("by_judge_and_game", (q) =>
-        q.eq("judgeId", args.judgeId).eq("gameId", args.gameId)
+        q.eq("judgeId", args.judgeId).eq("gameId", args.gameId),
       )
       .filter((q) => q.eq(q.field("entryId"), args.entryId))
       .first();
@@ -177,7 +174,7 @@ export const getWinners = query({
         if (!entry) return null;
         const player = await ctx.db.get(entry.playerId);
         return { vote, entry, player };
-      })
+      }),
     );
 
     return winners.filter((w) => w !== null);
@@ -214,7 +211,7 @@ export const getLeaderboard = query({
           // Combined score: typing performance + judge votes
           combinedScore: entry.totalScore + totalVoteScore * 10,
         };
-      })
+      }),
     );
 
     return leaderboard.sort((a, b) => b.combinedScore - a.combinedScore);
