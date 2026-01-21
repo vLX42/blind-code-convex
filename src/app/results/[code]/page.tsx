@@ -40,6 +40,15 @@ export default function ResultsPage() {
       : "skip"
   );
 
+  // Check if current user can vote
+  const canVoteResult = useQuery(
+    api.voteTokens.canUserVote,
+    game?._id && user?.id
+      ? { gameId: game._id, userId: user.id as Id<"users"> }
+      : "skip"
+  );
+  const canVote = canVoteResult?.canVote ?? false;
+
   const castVote = useMutation(api.votes.castVote);
   const selectWinner = useMutation(api.votes.selectWinner);
 
@@ -154,7 +163,7 @@ export default function ResultsPage() {
           >
             Submissions
           </button>
-          {user && (
+          {canVote && (
             <button
               onClick={() => setViewMode("voting")}
               className={`px-4 py-2 font-['Press_Start_2P'] text-[8px] uppercase transition ${
@@ -249,10 +258,10 @@ export default function ResultsPage() {
         )}
 
         {/* Voting View */}
-        {viewMode === "voting" && user && (
+        {viewMode === "voting" && canVote && (
           <div className="space-y-6">
             <p className="text-[10px] font-['Press_Start_2P'] text-gray-400">
-              Rate each submission 1-10.{isCreator && " Select a winner!"}
+              Rate each submission 1-10. Select a winner!
             </p>
             {entries && entries.length === 0 && (
               <div className="bg-[#0a0a12] border-4 border-[#3a9364] p-8 text-center"
@@ -326,19 +335,17 @@ export default function ResultsPage() {
                       >
                         Playback
                       </button>
-                      {isCreator && (
-                        <button
-                          onClick={() => handleSelectWinner(entry._id)}
-                          className={`px-4 py-2 font-['Press_Start_2P'] text-[8px] uppercase transition ${
-                            isSelectedWinner
-                              ? "bg-yellow-500 text-[#0a0a12]"
-                              : "bg-gradient-to-r from-yellow-500 to-[#ff6b6b] hover:from-yellow-400 hover:to-[#ff8888] text-[#0a0a12]"
-                          }`}
-                          style={{ boxShadow: '3px 3px 0 0 #997700' }}
-                        >
-                          {isSelectedWinner ? "Winner!" : "Select"}
-                        </button>
-                      )}
+                      <button
+                        onClick={() => handleSelectWinner(entry._id)}
+                        className={`px-4 py-2 font-['Press_Start_2P'] text-[8px] uppercase transition ${
+                          isSelectedWinner
+                            ? "bg-yellow-500 text-[#0a0a12]"
+                            : "bg-gradient-to-r from-yellow-500 to-[#ff6b6b] hover:from-yellow-400 hover:to-[#ff8888] text-[#0a0a12]"
+                        }`}
+                        style={{ boxShadow: '3px 3px 0 0 #997700' }}
+                      >
+                        {isSelectedWinner ? "Winner!" : "Select"}
+                      </button>
                     </div>
                   </div>
                 </div>

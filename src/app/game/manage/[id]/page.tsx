@@ -32,6 +32,14 @@ export default function GameManagePage() {
   const deleteGame = useMutation(api.games.deleteGame);
   const resetGame = useMutation(api.games.resetGame);
 
+  // Vote token management
+  const voteTokens = useQuery(
+    api.voteTokens.getGameVoteTokens,
+    user?.id ? { gameId, creatorId: user.id as Id<"users"> } : "skip"
+  );
+  const createVoteToken = useMutation(api.voteTokens.createVoteToken);
+  const deleteVoteToken = useMutation(api.voteTokens.deleteVoteToken);
+
   const [newAssetName, setNewAssetName] = useState("");
   const [newAssetType, setNewAssetType] = useState<"image" | "font" | "other">(
     "image",
@@ -66,6 +74,11 @@ export default function GameManagePage() {
   // Reset state
   const [isResetting, setIsResetting] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+  // Vote token state
+  const [newTokenLabel, setNewTokenLabel] = useState("");
+  const [isCreatingToken, setIsCreatingToken] = useState(false);
+  const [copiedTokenId, setCopiedTokenId] = useState<string | null>(null);
 
   // Edit mode state
   const [isEditing, setIsEditing] = useState(false);
@@ -334,6 +347,45 @@ export default function GameManagePage() {
     } finally {
       setIsResetting(false);
     }
+  };
+
+  const handleCreateVoteToken = async () => {
+    if (!user?.id) return;
+    setIsCreatingToken(true);
+    try {
+      await createVoteToken({
+        gameId,
+        creatorId: user.id as Id<"users">,
+        label: newTokenLabel.trim() || undefined,
+      });
+      setNewTokenLabel("");
+    } catch (error) {
+      console.error("Failed to create vote token:", error);
+      alert("Failed to create vote token");
+    } finally {
+      setIsCreatingToken(false);
+    }
+  };
+
+  const handleDeleteVoteToken = async (tokenId: Id<"voteTokens">) => {
+    if (!user?.id) return;
+    try {
+      await deleteVoteToken({
+        tokenId,
+        creatorId: user.id as Id<"users">,
+      });
+    } catch (error) {
+      console.error("Failed to delete vote token:", error);
+    }
+  };
+
+  const copyVoteLink = (token: string) => {
+    const voteUrl = typeof window !== "undefined"
+      ? `${window.location.origin}/vote/${token}`
+      : "";
+    navigator.clipboard.writeText(voteUrl);
+    setCopiedTokenId(token);
+    setTimeout(() => setCopiedTokenId(null), 2000);
   };
 
   const shareUrl =
@@ -854,6 +906,95 @@ export default function GameManagePage() {
 
           <p className="mt-4 text-[8px] font-['Press_Start_2P'] text-gray-500">
             Use short URLs: <code className="text-[#4ade80]">/a/abc1</code>
+          </p>
+        </div>
+
+        {/* Vote Tokens / Judge Invites */}
+        <div
+          className="bg-[#0a0a12] border-4 border-purple-600 p-6 mb-8"
+          style={{ boxShadow: "6px 6px 0 0 #553399" }}
+        >
+          <h2 className="text-sm font-['Press_Start_2P'] text-purple-400 mb-6">
+            {">> Judge Invites"}
+          </h2>
+          <p className="text-[10px] font-['Press_Start_2P'] text-gray-400 mb-6">
+            Create invite links for additional judges. They must login with GitHub to vote.
+          </p>
+
+          {/* Create New Token */}
+          <div className="mb-6">
+            <div className="flex flex-wrap items-center gap-3">
+              <input
+                type="text"
+                value={newTokenLabel}
+                onChange={(e) => setNewTokenLabel(e.target.value)}
+                placeholder="Judge name (optional)"
+                className="w-48 bg-[#1a1a2e] border-2 border-purple-600 px-4 py-2 text-sm focus:outline-none focus:border-purple-400"
+              />
+              <button
+                onClick={handleCreateVoteToken}
+                disabled={isCreatingToken}
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-500 font-['Press_Start_2P'] text-[8px] uppercase transition disabled:opacity-50"
+                style={{ boxShadow: "3px 3px 0 0 #553399" }}
+              >
+                {isCreatingToken ? "..." : "Create Invite"}
+              </button>
+            </div>
+          </div>
+
+          {/* Token List */}
+          {voteTokens && voteTokens.length > 0 ? (
+            <div className="space-y-3">
+              {voteTokens.map((voteToken) => (
+                <div
+                  key={voteToken._id}
+                  className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#1a1a2e] border-2 px-4 py-3 ${
+                    voteToken.usedBy ? "border-[#4ade80]" : "border-purple-600"
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <span className="text-xs font-['Press_Start_2P'] text-purple-400">
+                      {voteToken.label || "Judge"}
+                    </span>
+                    {voteToken.usedBy ? (
+                      <span className="text-[8px] font-['Press_Start_2P'] text-[#4ade80] bg-[#0a0a12] px-2 py-1 border border-[#4ade80]">
+                        Claimed
+                      </span>
+                    ) : (
+                      <span className="text-[8px] font-['Press_Start_2P'] text-gray-500 bg-[#0a0a12] px-2 py-1 border border-gray-600">
+                        Pending
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => copyVoteLink(voteToken.token)}
+                      className={`text-[10px] font-['Press_Start_2P'] transition px-3 py-1 ${
+                        copiedTokenId === voteToken.token
+                          ? "text-[#4ade80] bg-[#0a0a12] border border-[#4ade80]"
+                          : "text-[#0df] hover:text-white bg-[#0a0a12] border border-[#0df]"
+                      }`}
+                    >
+                      {copiedTokenId === voteToken.token ? "Copied!" : "Copy Link"}
+                    </button>
+                    <button
+                      onClick={() => handleDeleteVoteToken(voteToken._id)}
+                      className="text-[10px] font-['Press_Start_2P'] text-[#ff6b6b] hover:text-white px-2"
+                    >
+                      X
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[10px] font-['Press_Start_2P'] text-gray-500">
+              No judge invites yet. Create one to share!
+            </p>
+          )}
+
+          <p className="mt-4 text-[8px] font-['Press_Start_2P'] text-gray-500">
+            You (the creator) can always vote without an invite link.
           </p>
         </div>
 
