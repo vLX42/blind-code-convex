@@ -3,7 +3,6 @@ import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-html";
 import "ace-builds/src-noconflict/theme-vibrant_ink";
 import "ace-builds/src-noconflict/ext-emmet";
-import "ace-builds/src-noconflict/ext-language_tools";
 
 // Import emmet and attach to window for ace-emmet extension
 import emmet from "emmet-core";
@@ -52,8 +51,8 @@ export const Editor = ({
       width="100%"
       value={editorValue}
       editorProps={{ $blockScrolling: Infinity }}
-      enableBasicAutocompletion
-      enableLiveAutocompletion
+      enableBasicAutocompletion={false}
+      enableLiveAutocompletion={false}
       tabSize={2}
       fontSize={22}
       {...props}
