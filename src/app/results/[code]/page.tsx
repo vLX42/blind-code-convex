@@ -117,20 +117,21 @@ export default function ResultsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
       {/* Header */}
-      <header className="border-b border-gray-800 bg-gray-950/50 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b-4 border-[#3a9364] bg-[#0a0a12] sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link
             href="/"
-            className="text-2xl font-bold font-['Press_Start_2P'] text-green-400"
+            className="text-lg font-['Press_Start_2P'] text-[#4ade80]"
+            style={{ textShadow: '2px 2px 0 #2d7a50' }}
           >
             BLIND CODE
           </Link>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-400">{game.title}</span>
+            <span className="text-[10px] font-['Press_Start_2P'] text-[#ff6b6b]">{game.title}</span>
             {isCreator && (
               <Link
                 href={`/game/manage/${game._id}`}
-                className="text-sm text-gray-400 hover:text-white"
+                className="text-[10px] font-['Press_Start_2P'] text-[#4ade80] hover:text-white transition"
               >
                 Manage
               </Link>
@@ -141,45 +142,49 @@ export default function ResultsPage() {
 
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* View Mode Tabs */}
-        <div className="flex gap-4 mb-8">
+        <div className="flex flex-wrap gap-3 mb-8">
           <button
             onClick={() => setViewMode("submissions")}
-            className={`px-4 py-2 rounded-lg transition ${
+            className={`px-4 py-2 font-['Press_Start_2P'] text-[8px] uppercase transition ${
               viewMode === "submissions"
-                ? "bg-green-600"
-                : "bg-gray-800 hover:bg-gray-700"
+                ? "bg-[#3a9364] text-white"
+                : "bg-[#1a1a2e] hover:bg-[#2a2a4e] border-2 border-[#3a9364]"
             }`}
+            style={viewMode === "submissions" ? { boxShadow: '3px 3px 0 0 #2d7a50' } : {}}
           >
             Submissions
           </button>
           {user && (
             <button
               onClick={() => setViewMode("voting")}
-              className={`px-4 py-2 rounded-lg transition ${
+              className={`px-4 py-2 font-['Press_Start_2P'] text-[8px] uppercase transition ${
                 viewMode === "voting"
-                  ? "bg-purple-600"
-                  : "bg-gray-800 hover:bg-gray-700"
+                  ? "bg-purple-600 text-white"
+                  : "bg-[#1a1a2e] hover:bg-[#2a2a4e] border-2 border-purple-600"
               }`}
+              style={viewMode === "voting" ? { boxShadow: '3px 3px 0 0 #553399' } : {}}
             >
               Vote
             </button>
           )}
           <button
             onClick={() => setViewMode("leaderboard")}
-            className={`px-4 py-2 rounded-lg transition ${
+            className={`px-4 py-2 font-['Press_Start_2P'] text-[8px] uppercase transition ${
               viewMode === "leaderboard"
-                ? "bg-yellow-600"
-                : "bg-gray-800 hover:bg-gray-700"
+                ? "bg-yellow-600 text-[#0a0a12]"
+                : "bg-[#1a1a2e] hover:bg-[#2a2a4e] border-2 border-yellow-600"
             }`}
+            style={viewMode === "leaderboard" ? { boxShadow: '3px 3px 0 0 #997700' } : {}}
           >
             Leaderboard
           </button>
           {isCreator && leaderboard && leaderboard.length > 0 && (
             <button
               onClick={startReveal}
-              className="px-4 py-2 rounded-lg bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 transition font-semibold"
+              className="px-4 py-2 font-['Press_Start_2P'] text-[8px] uppercase bg-gradient-to-r from-[#ff6b6b] to-[#0df] hover:from-[#ff8888] hover:to-[#66ffff] transition text-[#0a0a12]"
+              style={{ boxShadow: '3px 3px 0 0 #993333' }}
             >
-              Reveal Winner
+              Reveal
             </button>
           )}
         </div>
@@ -189,9 +194,10 @@ export default function ResultsPage() {
           <div>
             <div className="grid md:grid-cols-2 gap-6">
               {/* Reference */}
-              <div className="bg-gray-900 rounded-xl p-6">
-                <h2 className="text-lg font-semibold mb-4">Target</h2>
-                <div className="aspect-video bg-gray-800 rounded-lg overflow-hidden">
+              <div className="bg-[#0a0a12] border-4 border-[#ff6b6b] p-6"
+                style={{ boxShadow: '6px 6px 0 0 #993333' }}>
+                <h2 className="text-sm font-['Press_Start_2P'] text-[#ff6b6b] mb-4">{">> Target"}</h2>
+                <div className="aspect-video bg-[#1a1a2e] border-2 border-[#3a9364] overflow-hidden">
                   <img
                     src={game.referenceImageUrl}
                     alt="Target"
@@ -203,11 +209,12 @@ export default function ResultsPage() {
               {/* Entries */}
               {entries && entries.length > 0 ? (
                 entries.map((entry) => (
-                  <div key={entry._id} className="bg-gray-900 rounded-xl p-6">
+                  <div key={entry._id} className="bg-[#0a0a12] border-4 border-[#3a9364] p-6"
+                    style={{ boxShadow: '6px 6px 0 0 #2d7a50' }}>
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold">{entry.player?.handle}</h3>
-                      <div className="text-sm text-gray-400">
-                        Score: {entry.totalScore}
+                      <h3 className="text-xs font-['Press_Start_2P'] text-[#4ade80]">{entry.player?.handle}</h3>
+                      <div className="text-[8px] font-['Press_Start_2P'] text-gray-400">
+                        Score: <span className="text-[#0df]">{entry.totalScore}</span>
                       </div>
                     </div>
                     <InlinePlayback
@@ -218,22 +225,23 @@ export default function ResultsPage() {
                     <div className="mt-4 flex items-center gap-4">
                       <button
                         onClick={() => setSelectedEntry(entry._id)}
-                        className="text-sm text-green-400 hover:text-green-300"
+                        className="text-[10px] font-['Press_Start_2P'] text-[#4ade80] hover:text-white transition"
                       >
-                        View Code
+                        Code
                       </button>
                       <button
                         onClick={() => setPlaybackEntry({ id: entry._id, playerName: entry.player?.handle || "Unknown" })}
-                        className="text-sm text-blue-400 hover:text-blue-300"
+                        className="text-[10px] font-['Press_Start_2P'] text-[#0df] hover:text-white transition"
                       >
-                        Full Playback
+                        Playback
                       </button>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="bg-gray-900 rounded-xl p-6 flex items-center justify-center">
-                  <p className="text-gray-500">No submissions yet</p>
+                <div className="bg-[#0a0a12] border-4 border-[#3a9364] p-6 flex items-center justify-center"
+                  style={{ boxShadow: '6px 6px 0 0 #2d7a50' }}>
+                  <p className="text-[10px] font-['Press_Start_2P'] text-gray-500">No submissions yet</p>
                 </div>
               )}
             </div>
@@ -243,12 +251,13 @@ export default function ResultsPage() {
         {/* Voting View */}
         {viewMode === "voting" && user && (
           <div className="space-y-6">
-            <p className="text-gray-400">
-              Rate each submission from 1-10.{isCreator && " As the creator, you can also select a winner."}
+            <p className="text-[10px] font-['Press_Start_2P'] text-gray-400">
+              Rate each submission 1-10.{isCreator && " Select a winner!"}
             </p>
             {entries && entries.length === 0 && (
-              <div className="bg-gray-900 rounded-xl p-8 text-center">
-                <p className="text-gray-500">No submissions to vote on yet</p>
+              <div className="bg-[#0a0a12] border-4 border-[#3a9364] p-8 text-center"
+                style={{ boxShadow: '6px 6px 0 0 #2d7a50' }}>
+                <p className="text-[10px] font-['Press_Start_2P'] text-gray-500">No submissions to vote on yet</p>
               </div>
             )}
             {entries?.map((entry) => {
@@ -258,27 +267,28 @@ export default function ResultsPage() {
               return (
                 <div
                   key={entry._id}
-                  className={`bg-gray-900 rounded-xl p-6 transition ${
+                  className={`bg-[#0a0a12] border-4 p-6 transition ${
                     isSelectedWinner
-                      ? "ring-2 ring-yellow-500 bg-gradient-to-r from-yellow-900/20 to-orange-900/20"
-                      : ""
+                      ? "border-yellow-500"
+                      : "border-[#3a9364]"
                   }`}
+                  style={{ boxShadow: isSelectedWinner ? '6px 6px 0 0 #997700' : '6px 6px 0 0 #2d7a50' }}
                 >
                   {isSelectedWinner && (
-                    <div className="flex items-center gap-2 mb-4 text-yellow-400">
+                    <div className="flex items-center gap-2 mb-4">
                       <span className="text-2xl">👑</span>
-                      <span className="font-semibold">Your Winner Pick</span>
+                      <span className="text-[10px] font-['Press_Start_2P'] text-yellow-400">Your Winner</span>
                     </div>
                   )}
-                  <div className="flex items-start gap-6">
-                    <div className="flex-1">
+                  <div className="flex flex-col md:flex-row items-start gap-6">
+                    <div className="flex-1 w-full">
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-semibold text-lg">{entry.player?.handle}</h3>
-                        <div className="text-sm text-gray-400">
-                          Typing Score: {entry.totalScore} | Streak: {entry.maxStreak}
+                        <h3 className="text-sm font-['Press_Start_2P'] text-[#4ade80]">{entry.player?.handle}</h3>
+                        <div className="text-[8px] font-['Press_Start_2P'] text-gray-400">
+                          Score: <span className="text-[#0df]">{entry.totalScore}</span> | Streak: <span className="text-[#ff6b6b]">{entry.maxStreak}</span>
                         </div>
                       </div>
-                      <div className="aspect-video bg-white rounded-lg overflow-hidden mb-4">
+                      <div className="aspect-video bg-white border-4 border-[#1a1a2e] overflow-hidden mb-4">
                         <iframe
                           src={renderPreview(entry.html || "")}
                           className="w-full h-full border-0"
@@ -287,17 +297,17 @@ export default function ResultsPage() {
                         />
                       </div>
                     </div>
-                    <div className="w-48 flex flex-col items-center gap-4">
-                      <div className="text-sm text-gray-400">Rate this submission</div>
+                    <div className="w-full md:w-48 flex flex-col items-center gap-4">
+                      <div className="text-[8px] font-['Press_Start_2P'] text-gray-400">Rate this</div>
                       <div className="grid grid-cols-5 gap-2">
                         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((score) => (
                           <button
                             key={score}
                             onClick={() => handleVote(entry._id, score)}
-                            className={`w-8 h-8 rounded text-sm font-semibold transition ${
+                            className={`w-8 h-8 text-xs font-['Press_Start_2P'] transition ${
                               myVote?.score === score
-                                ? "bg-green-600 text-white ring-2 ring-green-400"
-                                : "bg-gray-800 hover:bg-gray-700"
+                                ? "bg-[#4ade80] text-[#0a0a12] border-2 border-white"
+                                : "bg-[#1a1a2e] hover:bg-[#2a2a4e] border-2 border-[#3a9364]"
                             }`}
                           >
                             {score}
@@ -305,26 +315,28 @@ export default function ResultsPage() {
                         ))}
                       </div>
                       {myVote && (
-                        <div className="text-sm text-green-400">
-                          Your rating: {myVote.score}/10
+                        <div className="text-[8px] font-['Press_Start_2P'] text-[#4ade80]">
+                          {myVote.score}/10
                         </div>
                       )}
                       <button
                         onClick={() => setPlaybackEntry({ id: entry._id, playerName: entry.player?.handle || "Unknown" })}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm transition"
+                        className="px-4 py-2 bg-[#0df] text-[#0a0a12] font-['Press_Start_2P'] text-[8px] uppercase hover:bg-white transition"
+                        style={{ boxShadow: '3px 3px 0 0 #0099aa' }}
                       >
-                        View Playback
+                        Playback
                       </button>
                       {isCreator && (
                         <button
                           onClick={() => handleSelectWinner(entry._id)}
-                          className={`px-4 py-2 rounded-lg font-semibold transition ${
+                          className={`px-4 py-2 font-['Press_Start_2P'] text-[8px] uppercase transition ${
                             isSelectedWinner
-                              ? "bg-yellow-500 text-black"
-                              : "bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400"
+                              ? "bg-yellow-500 text-[#0a0a12]"
+                              : "bg-gradient-to-r from-yellow-500 to-[#ff6b6b] hover:from-yellow-400 hover:to-[#ff8888] text-[#0a0a12]"
                           }`}
+                          style={{ boxShadow: '3px 3px 0 0 #997700' }}
                         >
-                          {isSelectedWinner ? "Selected as Winner" : "Select as Winner"}
+                          {isSelectedWinner ? "Winner!" : "Select"}
                         </button>
                       )}
                     </div>
@@ -337,47 +349,50 @@ export default function ResultsPage() {
 
         {/* Leaderboard View */}
         {viewMode === "leaderboard" && (
-          <div className="bg-gray-900 rounded-xl overflow-hidden">
+          <div className="bg-[#0a0a12] border-4 border-[#3a9364] overflow-hidden"
+            style={{ boxShadow: '6px 6px 0 0 #2d7a50' }}>
             {leaderboard && leaderboard.length > 0 ? (
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-800">
-                    <th className="px-6 py-4 text-left">Rank</th>
-                    <th className="px-6 py-4 text-left">Player</th>
-                    <th className="px-6 py-4 text-right">Typing Score</th>
-                    <th className="px-6 py-4 text-right">Vote Score</th>
-                    <th className="px-6 py-4 text-right">Total</th>
-                    <th className="px-6 py-4 text-center">Winner</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {leaderboard.map((item, index) => (
-                    <tr
-                      key={item.entry._id}
-                      className={`border-b border-gray-800 ${
-                        item.isWinner ? "bg-gradient-to-r from-yellow-900/20 to-orange-900/20" : ""
-                      }`}
-                    >
-                      <td className="px-6 py-4">
-                        {index === 0 && <span className="text-2xl">🥇</span>}
-                        {index === 1 && <span className="text-2xl">🥈</span>}
-                        {index === 2 && <span className="text-2xl">🥉</span>}
-                        {index > 2 && <span className="text-gray-400">{index + 1}</span>}
-                      </td>
-                      <td className="px-6 py-4 font-semibold">{item.player?.handle}</td>
-                      <td className="px-6 py-4 text-right text-gray-400">{item.entry.totalScore}</td>
-                      <td className="px-6 py-4 text-right text-purple-400">{item.totalVoteScore}</td>
-                      <td className="px-6 py-4 text-right font-bold text-green-400">{item.combinedScore}</td>
-                      <td className="px-6 py-4 text-center">
-                        {item.isWinner && <span className="text-2xl">👑</span>}
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b-4 border-[#3a9364] bg-[#1a1a2e]">
+                      <th className="px-4 py-4 text-left text-[8px] font-['Press_Start_2P'] text-[#ff6b6b]">#</th>
+                      <th className="px-4 py-4 text-left text-[8px] font-['Press_Start_2P'] text-[#ff6b6b]">Player</th>
+                      <th className="px-4 py-4 text-right text-[8px] font-['Press_Start_2P'] text-[#ff6b6b]">Type</th>
+                      <th className="px-4 py-4 text-right text-[8px] font-['Press_Start_2P'] text-[#ff6b6b]">Votes</th>
+                      <th className="px-4 py-4 text-right text-[8px] font-['Press_Start_2P'] text-[#ff6b6b]">Total</th>
+                      <th className="px-4 py-4 text-center text-[8px] font-['Press_Start_2P'] text-[#ff6b6b]">👑</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {leaderboard.map((item, index) => (
+                      <tr
+                        key={item.entry._id}
+                        className={`border-b-2 border-[#1a1a2e] ${
+                          item.isWinner ? "bg-yellow-900/20" : index % 2 === 0 ? "" : "bg-[#1a1a2e]/30"
+                        }`}
+                      >
+                        <td className="px-4 py-4">
+                          {index === 0 && <span className="text-xl">🥇</span>}
+                          {index === 1 && <span className="text-xl">🥈</span>}
+                          {index === 2 && <span className="text-xl">🥉</span>}
+                          {index > 2 && <span className="text-[10px] font-['Press_Start_2P'] text-gray-500">{index + 1}</span>}
+                        </td>
+                        <td className="px-4 py-4 text-xs font-['Press_Start_2P'] text-[#4ade80]">{item.player?.handle}</td>
+                        <td className="px-4 py-4 text-right text-[10px] font-['Press_Start_2P'] text-gray-400">{item.entry.totalScore}</td>
+                        <td className="px-4 py-4 text-right text-[10px] font-['Press_Start_2P'] text-purple-400">{item.totalVoteScore}</td>
+                        <td className="px-4 py-4 text-right text-xs font-['Press_Start_2P'] text-[#0df]">{item.combinedScore}</td>
+                        <td className="px-4 py-4 text-center">
+                          {item.isWinner && <span className="text-xl">👑</span>}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             ) : (
               <div className="p-8 text-center">
-                <p className="text-gray-500">No entries yet</p>
+                <p className="text-[10px] font-['Press_Start_2P'] text-gray-500">No entries yet</p>
               </div>
             )}
           </div>
@@ -395,19 +410,24 @@ export default function ResultsPage() {
                   exit={{ scale: 1.5, opacity: 0 }}
                   className="text-center"
                 >
-                  <div className="text-6xl font-bold mb-4">#{revealIndex}</div>
+                  <div className="text-6xl font-['Press_Start_2P'] text-[#ff6b6b] mb-6"
+                    style={{ textShadow: '4px 4px 0 #993333, 0 0 40px rgba(255, 107, 107, 0.5)' }}>
+                    #{revealIndex}
+                  </div>
                   {leaderboard[revealIndex - 1] && (
                     <motion.div
                       initial={{ y: 50, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ delay: 0.3 }}
-                      className="bg-gray-900 rounded-xl p-8"
+                      className="bg-[#0a0a12] border-4 border-[#3a9364] p-8"
+                      style={{ boxShadow: '6px 6px 0 0 #2d7a50' }}
                     >
-                      <div className="text-3xl font-bold mb-2">
+                      <div className="text-2xl font-['Press_Start_2P'] text-[#4ade80] mb-4"
+                        style={{ textShadow: '2px 2px 0 #2d7a50' }}>
                         {leaderboard[revealIndex - 1].player?.handle}
                       </div>
-                      <div className="text-xl text-gray-400">
-                        Score: {leaderboard[revealIndex - 1].combinedScore}
+                      <div className="text-sm font-['Press_Start_2P'] text-[#0df]">
+                        {leaderboard[revealIndex - 1].combinedScore} pts
                       </div>
                     </motion.div>
                   )}
@@ -432,12 +452,13 @@ export default function ResultsPage() {
                   >
                     👑
                   </motion.div>
-                  <div className="text-2xl text-gray-400 mb-4">THE WINNER IS</div>
+                  <div className="text-sm font-['Press_Start_2P'] text-[#ff6b6b] mb-6">THE WINNER IS</div>
                   <motion.div
                     initial={{ y: 50, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.5 }}
-                    className="text-6xl font-bold bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-400 bg-clip-text text-transparent"
+                    className="text-4xl md:text-6xl font-['Press_Start_2P'] text-[#4ade80]"
+                    style={{ textShadow: '4px 4px 0 #2d7a50, 0 0 40px rgba(74, 222, 128, 0.6)' }}
                   >
                     {leaderboard[0]?.player?.handle}
                   </motion.div>
@@ -445,9 +466,9 @@ export default function ResultsPage() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 1 }}
-                    className="mt-8 text-xl text-gray-400"
+                    className="mt-8 text-lg font-['Press_Start_2P'] text-[#0df]"
                   >
-                    Final Score: {leaderboard[0]?.combinedScore}
+                    {leaderboard[0]?.combinedScore} pts
                   </motion.div>
 
                   <motion.div
@@ -458,9 +479,9 @@ export default function ResultsPage() {
                   >
                     <button
                       onClick={() => setViewMode("leaderboard")}
-                      className="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition"
+                      className="px-6 py-3 bg-[#1a1a2e] hover:bg-[#2a2a4e] font-['Press_Start_2P'] text-[10px] uppercase border-2 border-[#3a9364] transition"
                     >
-                      View Full Leaderboard
+                      Full Leaderboard
                     </button>
                   </motion.div>
                 </motion.div>
@@ -472,23 +493,24 @@ export default function ResultsPage() {
         {/* Code Modal */}
         {selectedEntry && (
           <div
-            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
             onClick={() => setSelectedEntry(null)}
           >
             <div
-              className="bg-gray-900 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-auto"
+              className="bg-[#0a0a12] border-4 border-[#3a9364] max-w-4xl w-full max-h-[90vh] overflow-auto"
               onClick={(e) => e.stopPropagation()}
+              style={{ boxShadow: '8px 8px 0 0 #2d7a50' }}
             >
-              <div className="p-4 border-b border-gray-800 flex items-center justify-between">
-                <h2 className="font-semibold">Code View</h2>
+              <div className="p-4 border-b-4 border-[#3a9364] flex items-center justify-between bg-[#1a1a2e]">
+                <h2 className="text-sm font-['Press_Start_2P'] text-[#4ade80]">{">> Code"}</h2>
                 <button
                   onClick={() => setSelectedEntry(null)}
-                  className="text-gray-400 hover:text-white text-2xl"
+                  className="text-[#ff6b6b] hover:text-white font-['Press_Start_2P'] text-sm px-3 py-1 bg-[#0a0a12] border-2 border-[#ff6b6b] hover:bg-[#ff6b6b] transition"
                 >
-                  &times;
+                  X
                 </button>
               </div>
-              <pre className="p-6 text-sm overflow-auto">
+              <pre className="p-6 text-sm overflow-auto font-mono text-[#4ade80]">
                 <code>
                   {entries?.find((e) => e._id === selectedEntry)?.html || ""}
                 </code>
