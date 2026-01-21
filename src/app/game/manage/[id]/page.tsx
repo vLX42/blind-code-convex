@@ -30,6 +30,7 @@ export default function GameManagePage() {
   const removeAsset = useMutation(api.assets.removeAsset);
   const updateGame = useMutation(api.games.updateGame);
   const deleteGame = useMutation(api.games.deleteGame);
+  const resetGame = useMutation(api.games.resetGame);
 
   const [newAssetName, setNewAssetName] = useState("");
   const [newAssetType, setNewAssetType] = useState<"image" | "font" | "other">(
@@ -61,6 +62,10 @@ export default function GameManagePage() {
   // Delete state
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Reset state
+  const [isResetting, setIsResetting] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   // Edit mode state
   const [isEditing, setIsEditing] = useState(false);
@@ -313,6 +318,24 @@ export default function GameManagePage() {
     }
   };
 
+  const handleResetGame = async () => {
+    if (!user?.id) return;
+
+    setIsResetting(true);
+    try {
+      await resetGame({
+        gameId,
+        creatorId: user.id as Id<"users">,
+      });
+      setShowResetConfirm(false);
+    } catch (error) {
+      console.error("Failed to reset game:", error);
+      alert("Failed to reset game");
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   const shareUrl =
     typeof window !== "undefined"
       ? `${window.location.origin}/game/${game.shortCode}`
@@ -421,6 +444,15 @@ export default function GameManagePage() {
                   style={{ boxShadow: "3px 3px 0 0 #333" }}
                 >
                   Finish
+                </button>
+              )}
+              {(game.status === "active" || game.status === "voting" || game.status === "finished") && (
+                <button
+                  onClick={() => setShowResetConfirm(true)}
+                  className="px-4 py-2 bg-[#1a1a2e] hover:bg-orange-500 text-orange-400 hover:text-white font-['Press_Start_2P'] text-[8px] uppercase transition border-2 border-orange-500"
+                  style={{ boxShadow: "3px 3px 0 0 #996633" }}
+                >
+                  Reset
                 </button>
               )}
               <button
@@ -905,6 +937,59 @@ export default function GameManagePage() {
           autoPlay={playbackEntry.autoPlay}
           targetDuration={15}
         />
+      )}
+
+      {/* Reset Confirmation Modal */}
+      {showResetConfirm && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+          <div
+            className="bg-[#0a0a12] border-4 border-orange-500 max-w-md w-full p-6"
+            style={{ boxShadow: "8px 8px 0 0 #996633" }}
+          >
+            <h2 className="text-sm font-['Press_Start_2P'] mb-6 text-orange-400">
+              {">> Reset Game"}
+            </h2>
+            <p className="text-gray-300 text-sm mb-4">
+              Reset{" "}
+              <span className="text-[#4ade80] font-['Press_Start_2P'] text-[10px]">
+                {game.title}
+              </span>
+              ?
+            </p>
+            <p className="text-[10px] font-['Press_Start_2P'] text-gray-400 mb-4">
+              This will delete all player data:
+            </p>
+            <ul className="text-[10px] font-['Press_Start_2P'] text-gray-500 mb-6 space-y-2">
+              <li>- All players</li>
+              <li>- All submissions</li>
+              <li>- All votes</li>
+              <li>- All progress snapshots</li>
+            </ul>
+            <p className="text-[10px] font-['Press_Start_2P'] text-[#4ade80] mb-6">
+              Game settings and assets will be kept.
+            </p>
+            <p className="text-[10px] font-['Press_Start_2P'] text-orange-400 mb-6">
+              Cannot be undone!
+            </p>
+            <div className="flex gap-4">
+              <button
+                onClick={() => setShowResetConfirm(false)}
+                disabled={isResetting}
+                className="flex-1 px-4 py-3 bg-[#1a1a2e] hover:bg-[#2a2a4e] font-['Press_Start_2P'] text-[10px] uppercase transition disabled:opacity-50 border-2 border-gray-600"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleResetGame}
+                disabled={isResetting}
+                className="flex-1 px-4 py-3 bg-orange-500 hover:bg-orange-400 text-[#0a0a12] font-['Press_Start_2P'] text-[10px] uppercase transition disabled:opacity-50"
+                style={{ boxShadow: "4px 4px 0 0 #996633" }}
+              >
+                {isResetting ? "..." : "Reset"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Delete Confirmation Modal */}

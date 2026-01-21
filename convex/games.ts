@@ -264,6 +264,75 @@ export const getActiveGames = query({
   },
 });
 
+// Reset a game - delete all player data but keep game settings
+export const resetGame = mutation({
+  args: {
+    gameId: v.id("games"),
+    creatorId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const game = await ctx.db.get(args.gameId);
+    if (!game) {
+      throw new Error("Game not found");
+    }
+    if (game.creatorId !== args.creatorId) {
+      throw new Error("Only the creator can reset this game");
+    }
+
+    // Delete all votes
+    const votes = await ctx.db
+      .query("votes")
+      .withIndex("by_game", (q) => q.eq("gameId", args.gameId))
+      .collect();
+    for (const vote of votes) {
+      await ctx.db.delete(vote._id);
+    }
+
+    // Delete all entries and their progress snapshots
+    const entries = await ctx.db
+      .query("entries")
+      .withIndex("by_game", (q) => q.eq("gameId", args.gameId))
+      .collect();
+    for (const entry of entries) {
+      const snapshots = await ctx.db
+        .query("progressSnapshots")
+        .withIndex("by_entry", (q) => q.eq("entryId", entry._id))
+        .collect();
+      for (const snapshot of snapshots) {
+        await ctx.db.delete(snapshot._id);
+      }
+      await ctx.db.delete(entry._id);
+    }
+
+    // Delete all players
+    const players = await ctx.db
+      .query("players")
+      .withIndex("by_game", (q) => q.eq("gameId", args.gameId))
+      .collect();
+    for (const player of players) {
+      await ctx.db.delete(player._id);
+    }
+
+    // Delete all vote tokens
+    const voteTokens = await ctx.db
+      .query("voteTokens")
+      .withIndex("by_game", (q) => q.eq("gameId", args.gameId))
+      .collect();
+    for (const token of voteTokens) {
+      await ctx.db.delete(token._id);
+    }
+
+    // Reset game status to lobby (ready for new players)
+    await ctx.db.patch(args.gameId, {
+      status: "lobby",
+      startedAt: undefined,
+      endedAt: undefined,
+    });
+
+    return { success: true };
+  },
+});
+
 // Delete a game and all associated data
 export const deleteGame = mutation({
   args: {
