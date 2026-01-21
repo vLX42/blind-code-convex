@@ -63,7 +63,7 @@ export default function GameLobbyPage() {
         userId: user?.id as Id<"users"> | undefined,
         handle: handle.trim(),
       });
-      // Store playerId for guest players who don't have user.id
+      // Store playerId as backup (works even if user logs out later)
       if (playerId) {
         localStorage.setItem(`blindcode_player_${code}`, playerId);
       }
