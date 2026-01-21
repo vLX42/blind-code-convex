@@ -11,11 +11,12 @@ import Link from "next/link";
 export default function VotePage() {
   const params = useParams();
   const router = useRouter();
-  const { user, login } = useAuth();
+  const { user, login, isLoading: authLoading } = useAuth();
   const token = params.token as string;
 
   const [isClaiming, setIsClaiming] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasAttemptedClaim, setHasAttemptedClaim] = useState(false);
 
   const tokenInfo = useQuery(api.voteTokens.getTokenInfo, { token });
   const claimToken = useMutation(api.voteTokens.claimVoteToken);
@@ -29,26 +30,46 @@ export default function VotePage() {
   // Auto-claim token when user is logged in
   useEffect(() => {
     const claim = async () => {
-      if (!user?.id || !tokenInfo || isClaiming) return;
+      // Wait for auth to load and user to be logged in
+      if (authLoading || !user?.id || !tokenInfo || !game?.shortCode) return;
 
-      // If token is already claimed by this user, redirect
+      // Don't claim twice
+      if (isClaiming || hasAttemptedClaim) return;
+
+      // If token is already claimed, just redirect (the claim mutation will handle if it's a different user)
       if (tokenInfo.isClaimed) {
-        if (game?.shortCode) {
+        setIsClaiming(true);
+        try {
+          // Try to claim - if already claimed by this user, it will succeed
+          // If claimed by another user, it will throw an error
+          await claimToken({
+            token,
+            userId: user.id as Id<"users">,
+          });
           router.push(`/results/${game.shortCode}`);
+        } catch (err: any) {
+          // If the token was already claimed by this user, we can still redirect
+          if (err.message?.includes("already been claimed by another user")) {
+            setError("This invite link has already been used by another judge.");
+            setIsClaiming(false);
+          } else {
+            // Token was claimed by this same user, redirect
+            router.push(`/results/${game.shortCode}`);
+          }
         }
+        setHasAttemptedClaim(true);
         return;
       }
 
+      // Token not claimed yet - claim it
       setIsClaiming(true);
+      setHasAttemptedClaim(true);
       try {
         await claimToken({
           token,
           userId: user.id as Id<"users">,
         });
-        // Redirect to results page
-        if (game?.shortCode) {
-          router.push(`/results/${game.shortCode}`);
-        }
+        router.push(`/results/${game.shortCode}`);
       } catch (err: any) {
         setError(err.message || "Failed to claim vote token");
         setIsClaiming(false);
@@ -56,10 +77,10 @@ export default function VotePage() {
     };
 
     claim();
-  }, [user?.id, tokenInfo, game?.shortCode, isClaiming]);
+  }, [user?.id, tokenInfo, game?.shortCode, authLoading, isClaiming, hasAttemptedClaim, token, claimToken, router]);
 
-  // Loading state
-  if (tokenInfo === undefined) {
+  // Loading state - token info or auth loading
+  if (tokenInfo === undefined || authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0a0a12]">
         <div className="text-xl font-['Press_Start_2P'] text-[#4ade80] animate-pulse">
@@ -123,8 +144,8 @@ export default function VotePage() {
     );
   }
 
-  // Claiming in progress
-  if (isClaiming || (user && tokenInfo.isClaimed)) {
+  // User is logged in and we're claiming/redirecting
+  if (user && isClaiming) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0a0a12]">
         <div className="text-center">
@@ -181,6 +202,12 @@ export default function VotePage() {
             {tokenInfo.gameStatus.toUpperCase()}
           </p>
         </div>
+
+        {tokenInfo.isClaimed && (
+          <p className="text-[10px] font-['Press_Start_2P'] text-yellow-400 mb-4 text-center">
+            This invite has been claimed. Login to verify it&apos;s yours.
+          </p>
+        )}
 
         <p className="text-[10px] font-['Press_Start_2P'] text-gray-400 mb-6 text-center">
           Login with GitHub to vote on submissions
