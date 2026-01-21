@@ -54,6 +54,13 @@ export default function ResultsPage() {
 
   const isCreator = user?.id === game?.creatorId;
 
+  // Reset view mode if user loses voting permission
+  useEffect(() => {
+    if (viewMode === "voting" && !canVote) {
+      setViewMode("submissions");
+    }
+  }, [viewMode, canVote]);
+
   // Helper to get user's vote for an entry
   const getMyVoteForEntry = (entryId: Id<"entries">) => {
     return myVotes?.find((v) => v.entryId === entryId);
