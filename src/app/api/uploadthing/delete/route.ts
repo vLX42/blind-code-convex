@@ -12,8 +12,9 @@ function extractFileKey(url: string): string | null {
     const urlObj = new URL(url);
     const pathParts = urlObj.pathname.split("/");
     const fIndex = pathParts.indexOf("f");
-    if (fIndex !== -1 && pathParts[fIndex + 1]) {
-      return pathParts[fIndex + 1];
+    const key = pathParts[fIndex + 1];
+    if (fIndex !== -1 && key) {
+      return key;
     }
     return null;
   } catch {

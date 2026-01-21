@@ -1,11 +1,12 @@
-import { mutation, query } from "./_generated/server";
+import { mutation, query, MutationCtx } from "./_generated/server";
 import { v } from "convex/values";
+import { Id } from "./_generated/dataModel";
 
 // Helper function to check if user can vote
 async function canUserVoteOnGame(
-  ctx: { db: { get: (id: any) => Promise<any>; query: (table: string) => any } },
-  gameId: any,
-  userId: any
+  ctx: MutationCtx,
+  gameId: Id<"games">,
+  userId: Id<"users">
 ): Promise<boolean> {
   const game = await ctx.db.get(gameId);
   if (!game) return false;

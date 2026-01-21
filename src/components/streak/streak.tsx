@@ -31,7 +31,7 @@ export const Streak = ({ streak, powerMode }: props) => {
   useEffect(() => {
     if (streak > 0 && streak % EXCLAMATION_EVERY === 0) {
       setExclamation(
-        EXCLAMATIONS[Math.floor(streak / EXCLAMATION_EVERY) % EXCLAMATION_EVERY]
+        EXCLAMATIONS[Math.floor(streak / EXCLAMATION_EVERY) % EXCLAMATION_EVERY] || null
       );
     }
   }, [streak]);

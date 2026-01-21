@@ -424,10 +424,10 @@ export default function ResultsPage() {
                     >
                       <div className="text-2xl font-['Press_Start_2P'] text-[#4ade80] mb-4"
                         style={{ textShadow: '2px 2px 0 #2d7a50' }}>
-                        {leaderboard[revealIndex - 1].player?.handle}
+                        {leaderboard[revealIndex - 1]?.player?.handle}
                       </div>
                       <div className="text-sm font-['Press_Start_2P'] text-[#0df]">
-                        {leaderboard[revealIndex - 1].combinedScore} pts
+                        {leaderboard[revealIndex - 1]?.combinedScore} pts
                       </div>
                     </motion.div>
                   )}

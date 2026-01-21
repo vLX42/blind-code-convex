@@ -31,7 +31,7 @@ export const Editor = ({
     if (editorRef.current) {
       const editor = editorRef.current.editor;
       if (editor) {
-        editor.setOption("enableEmmet", true);
+        editor.setOption("enableEmmet" as any, true);
       }
     }
   }, []);

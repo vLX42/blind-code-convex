@@ -507,13 +507,19 @@ function CreateGameModal({ onClose }: { onClose: () => void }) {
   const addColor = () => setHexColors([...hexColors, { name: "", hex: "" }]);
   const updateColorName = (index: number, name: string) => {
     const newColors = [...hexColors];
-    newColors[index] = { ...newColors[index], name };
-    setHexColors(newColors);
+    const color = newColors[index];
+    if (color) {
+      newColors[index] = { ...color, name };
+      setHexColors(newColors);
+    }
   };
   const updateColorHex = (index: number, hex: string) => {
     const newColors = [...hexColors];
-    newColors[index] = { ...newColors[index], hex };
-    setHexColors(newColors);
+    const color = newColors[index];
+    if (color) {
+      newColors[index] = { ...color, hex };
+      setHexColors(newColors);
+    }
   };
   const removeColor = (index: number) => {
     setHexColors(hexColors.filter((_, i) => i !== index));

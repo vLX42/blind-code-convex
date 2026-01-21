@@ -230,6 +230,7 @@ export function Playback({ entryId, playerName, onClose, autoPlay = false, targe
               <div className="space-y-2 text-xs">
                 {(() => {
                   const prevSnapshot = sortedSnapshots[currentIndex - 1];
+                  if (!prevSnapshot) return null;
                   const charDiff = (currentSnapshot.html?.length || 0) - (prevSnapshot.html?.length || 0);
                   const timeDiff = currentSnapshot.timestamp - prevSnapshot.timestamp;
                   const charsPerSecond = charDiff / (timeDiff / 1000);

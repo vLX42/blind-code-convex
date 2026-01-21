@@ -202,13 +202,19 @@ export default function GameManagePage() {
   const addColor = () => setEditHexColors([...editHexColors, { name: "", hex: "" }]);
   const updateColorName = (index: number, name: string) => {
     const newColors = [...editHexColors];
-    newColors[index] = { ...newColors[index], name };
-    setEditHexColors(newColors);
+    const color = newColors[index];
+    if (color) {
+      newColors[index] = { ...color, name };
+      setEditHexColors(newColors);
+    }
   };
   const updateColorHex = (index: number, hex: string) => {
     const newColors = [...editHexColors];
-    newColors[index] = { ...newColors[index], hex };
-    setEditHexColors(newColors);
+    const color = newColors[index];
+    if (color) {
+      newColors[index] = { ...color, hex };
+      setEditHexColors(newColors);
+    }
   };
   const removeColor = (index: number) => {
     setEditHexColors(editHexColors.filter((_, i) => i !== index));
