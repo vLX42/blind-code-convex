@@ -408,7 +408,7 @@ export default function PlayPage() {
       <Modal show={showInstructions} setShow={setShowInstructions}>
         <div className="p-4 text-[10px] leading-relaxed">
           <h2 className="text-lg text-[#4ade80] mb-4 uppercase tracking-wider">{game.title}</h2>
-          <p className="text-[#e0e0e0] mb-6">{game.description}</p>
+          <p className="text-[#e0e0e0] mb-6 whitespace-pre-wrap">{game.description}</p>
 
           {game.requirements && (
             <div className="mb-6">

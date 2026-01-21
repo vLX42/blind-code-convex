@@ -614,7 +614,7 @@ export default function GameManagePage() {
                 <label className="block text-xs text-gray-500 mb-1">
                   Description
                 </label>
-                <p className="text-gray-300">{game.description}</p>
+                <p className="text-gray-300 whitespace-pre-wrap">{game.description}</p>
               </div>
 
               <div>

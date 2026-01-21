@@ -152,7 +152,7 @@ export default function GameLobbyPage() {
               {game.status === "lobby" ? "Waiting..." : game.status}
             </span>
           </div>
-          <p className="text-gray-400 text-xs mb-4">{game.description}</p>
+          <p className="text-gray-400 text-xs mb-4 whitespace-pre-wrap">{game.description}</p>
           <div className="flex items-center gap-6 text-[10px] font-['Press_Start_2P'] text-gray-500">
             <span><span className="text-[#ff6b6b]">Time:</span> {game.durationMinutes}min</span>
             <span><span className="text-[#ff6b6b]">Players:</span> {players?.filter((p) => p.isActive).length || 0}</span>
