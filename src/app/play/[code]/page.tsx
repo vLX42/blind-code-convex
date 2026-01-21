@@ -20,7 +20,7 @@ const Editor = dynamic<EditorProps>(
 
 const STREAK_TIMEOUT = 10 * 1000;
 const POWER_MODE_ACTIVATION_THRESHOLD = 200;
-const SNAPSHOT_INTERVAL = 10000; // Save progress every 10 seconds for playback
+const SNAPSHOT_INTERVAL = 20000; // Save progress every 20 seconds for playback
 const SLIDESHOW_INTERVAL = 5000; // Switch submission every 5 seconds
 
 export default function PlayPage() {
