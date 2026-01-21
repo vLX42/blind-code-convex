@@ -54,12 +54,12 @@ export default function ResultsPage() {
 
   const isCreator = user?.id === game?.creatorId;
 
-  // Reset view mode if user loses voting permission
+  // Reset view mode if user loses voting permission or logs out
   useEffect(() => {
-    if (viewMode === "voting" && !canVote) {
+    if (viewMode === "voting" && (!user || !canVote)) {
       setViewMode("submissions");
     }
-  }, [viewMode, canVote]);
+  }, [viewMode, canVote, user]);
 
   // Helper to get user's vote for an entry
   const getMyVoteForEntry = (entryId: Id<"entries">) => {
@@ -170,7 +170,7 @@ export default function ResultsPage() {
           >
             Submissions
           </button>
-          {canVote && (
+          {user && canVote && (
             <button
               onClick={() => setViewMode("voting")}
               className={`px-4 py-2 font-['Press_Start_2P'] text-[8px] uppercase transition ${
@@ -265,7 +265,7 @@ export default function ResultsPage() {
         )}
 
         {/* Voting View */}
-        {viewMode === "voting" && canVote && (
+        {viewMode === "voting" && user && canVote && (
           <div className="space-y-6">
             <p className="text-[10px] font-['Press_Start_2P'] text-gray-400">
               Rate each submission 1-10. Select a winner!
