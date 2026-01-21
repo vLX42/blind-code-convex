@@ -211,67 +211,78 @@ export default function GameLobbyPage() {
           </div>
         )}
 
-        {/* Reference Image Preview */}
+        {/* Reference Image Preview - Hidden until game starts */}
         <div className="bg-[#0a0a12] border-4 border-[#3a9364] p-6 mb-8"
           style={{ boxShadow: '6px 6px 0 0 #2d7a50' }}>
           <h2 className="text-xs font-['Press_Start_2P'] mb-4 text-[#ff6b6b]">{">> Target"}</h2>
           <div className="aspect-video bg-[#1a1a2e] border-4 border-[#3a9364] overflow-hidden flex items-center justify-center"
             style={{ boxShadow: 'inset 4px 4px 0 0 #0a0a12' }}>
-            <img
-              src={game.referenceImageUrl}
-              alt="Target"
-              className="max-w-full max-h-full object-contain"
-              style={{ imageRendering: 'pixelated' }}
-            />
-          </div>
-        </div>
-
-        {/* Colors & Assets */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          {/* Colors */}
-          <div className="bg-[#0a0a12] border-4 border-[#3a9364] p-6"
-            style={{ boxShadow: '6px 6px 0 0 #2d7a50' }}>
-            <h2 className="text-xs font-['Press_Start_2P'] mb-4 text-[#ff6b6b]">{">> Colors"}</h2>
-            <div className="flex flex-wrap gap-3">
-              {game.hexColors.map((color, index) => (
-                <div key={index} className="flex items-center gap-3 bg-[#1a1a2e] px-3 py-2 border-2 border-[#3a9364]"
-                  style={{ boxShadow: '3px 3px 0 0 #2d7a50' }}>
-                  <div
-                    className="w-6 h-6 border-2 border-white"
-                    style={{ backgroundColor: color.hex }}
-                  />
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-['Press_Start_2P'] text-[#4ade80]">{color.name}</span>
-                    <code className="text-[10px] font-bold text-white">{color.hex}</code>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Assets */}
-          <div className="bg-[#0a0a12] border-4 border-[#3a9364] p-6"
-            style={{ boxShadow: '6px 6px 0 0 #2d7a50' }}>
-            <h2 className="text-xs font-['Press_Start_2P'] mb-4 text-[#ff6b6b]">{">> Assets"}</h2>
-            {assets && assets.length > 0 ? (
-              <div className="space-y-2">
-                {assets.map((asset) => (
-                  <div
-                    key={asset._id}
-                    className="flex items-center justify-between bg-[#1a1a2e] px-3 py-2 border-2 border-[#3a9364]"
-                  >
-                    <span className="text-xs text-white">{asset.name}</span>
-                    <code className="text-[10px] font-['Press_Start_2P'] text-[#4ade80]">
-                      /a/{asset.shortCode}
-                    </code>
-                  </div>
-                ))}
-              </div>
+            {game.status === "active" ? (
+              <img
+                src={game.referenceImageUrl}
+                alt="Target"
+                className="max-w-full max-h-full object-contain"
+                style={{ imageRendering: 'pixelated' }}
+              />
             ) : (
-              <p className="text-[10px] font-['Press_Start_2P'] text-gray-500">No assets</p>
+              <div className="text-center p-8">
+                <div className="text-4xl mb-4">🔒</div>
+                <p className="text-[10px] font-['Press_Start_2P'] text-gray-500">
+                  Revealed when game starts
+                </p>
+              </div>
             )}
           </div>
         </div>
+
+        {/* Colors & Assets - Only shown after game starts */}
+        {game.status === "active" && (
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            {/* Colors */}
+            <div className="bg-[#0a0a12] border-4 border-[#3a9364] p-6"
+              style={{ boxShadow: '6px 6px 0 0 #2d7a50' }}>
+              <h2 className="text-xs font-['Press_Start_2P'] mb-4 text-[#ff6b6b]">{">> Colors"}</h2>
+              <div className="flex flex-wrap gap-3">
+                {game.hexColors.map((color, index) => (
+                  <div key={index} className="flex items-center gap-3 bg-[#1a1a2e] px-3 py-2 border-2 border-[#3a9364]"
+                    style={{ boxShadow: '3px 3px 0 0 #2d7a50' }}>
+                    <div
+                      className="w-6 h-6 border-2 border-white"
+                      style={{ backgroundColor: color.hex }}
+                    />
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-['Press_Start_2P'] text-[#4ade80]">{color.name}</span>
+                      <code className="text-[10px] font-bold text-white">{color.hex}</code>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Assets */}
+            <div className="bg-[#0a0a12] border-4 border-[#3a9364] p-6"
+              style={{ boxShadow: '6px 6px 0 0 #2d7a50' }}>
+              <h2 className="text-xs font-['Press_Start_2P'] mb-4 text-[#ff6b6b]">{">> Assets"}</h2>
+              {assets && assets.length > 0 ? (
+                <div className="space-y-2">
+                  {assets.map((asset) => (
+                    <div
+                      key={asset._id}
+                      className="flex items-center justify-between bg-[#1a1a2e] px-3 py-2 border-2 border-[#3a9364]"
+                    >
+                      <span className="text-xs text-white">{asset.name}</span>
+                      <code className="text-[10px] font-['Press_Start_2P'] text-[#4ade80]">
+                        /a/{asset.shortCode}
+                      </code>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[10px] font-['Press_Start_2P'] text-gray-500">No assets</p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Requirements */}
         {game.requirements && (
