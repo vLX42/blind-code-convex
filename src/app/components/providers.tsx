@@ -50,7 +50,7 @@ function AuthProvider({ children }: PropsWithChildren) {
   const login = () => {
     const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
     const redirectUri = `${window.location.origin}/api/auth/callback`;
-    const scope = "read:user user:email";
+    const scope = "read:user";
 
     window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}`;
   };

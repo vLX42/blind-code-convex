@@ -47,23 +47,12 @@ export async function GET(request: NextRequest) {
 
     const githubUser = await userResponse.json();
 
-    // Get user email
-    const emailsResponse = await fetch("https://api.github.com/user/emails", {
-      headers: {
-        Authorization: `Bearer ${tokenData.access_token}`,
-      },
-    });
-
-    const emails = await emailsResponse.json();
-    const primaryEmail = emails.find((e: { primary: boolean }) => e.primary)?.email;
-
     // Create or update user in Convex
     const userId = await convex.mutation(api.auth.upsertUser, {
       githubId: String(githubUser.id),
       username: githubUser.login,
       name: githubUser.name || undefined,
       avatarUrl: githubUser.avatar_url || undefined,
-      email: primaryEmail || undefined,
     });
 
     // Create a session response
