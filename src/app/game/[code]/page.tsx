@@ -42,9 +42,10 @@ export default function GameLobbyPage() {
     }
   }, [existingPlayer]);
 
-  // Redirect to play page when game starts
+  // Redirect based on game status
   useEffect(() => {
     if (game?.status === "active" && hasJoined) {
+      // Redirect to play page immediately
       router.push(`/play/${code}`);
     }
     if (game?.status === "voting" || game?.status === "finished") {
@@ -68,6 +69,11 @@ export default function GameLobbyPage() {
         localStorage.setItem(`blindcode_player_${code}`, playerId);
       }
       setHasJoined(true);
+
+      // If game is already active, redirect immediately to play page
+      if (game.status === "active") {
+        router.push(`/play/${code}`);
+      }
     } catch (error) {
       console.error("Failed to join game:", error);
     } finally {
@@ -144,12 +150,14 @@ export default function GameLobbyPage() {
               className={`px-3 py-1 text-[8px] font-['Press_Start_2P'] uppercase ${
                 game.status === "lobby"
                   ? "bg-yellow-600 text-black"
-                  : game.status === "draft"
-                    ? "bg-gray-600"
-                    : "bg-[#3a9364]"
+                  : game.status === "active"
+                    ? "bg-green-600 text-black"
+                    : game.status === "draft"
+                      ? "bg-gray-600"
+                      : "bg-[#3a9364]"
               }`}
             >
-              {game.status === "lobby" ? "Waiting..." : game.status}
+              {game.status === "lobby" ? "Waiting..." : game.status === "active" ? "In Progress" : game.status}
             </span>
           </div>
           <p className="text-gray-400 text-xs mb-4 whitespace-pre-wrap">{game.description}</p>
@@ -159,11 +167,20 @@ export default function GameLobbyPage() {
           </div>
         </div>
 
-        {/* Join Section - Moved to top for visibility */}
-        {game.status === "lobby" && !hasJoined && (
+        {/* Join Section - Allow joining during lobby or active game */}
+        {(game.status === "lobby" || game.status === "active") && !hasJoined && (
           <div className="bg-[#0a0a12] border-4 border-[#4ade80] p-6 mb-8"
             style={{ boxShadow: '6px 6px 0 0 #2d7a50, 0 0 20px rgba(74, 222, 128, 0.3)' }}>
-            <h2 className="text-sm font-['Press_Start_2P'] mb-4 text-[#4ade80]">{">> Enter Your Name"}</h2>
+            <h2 className="text-sm font-['Press_Start_2P'] mb-4 text-[#4ade80]">
+              {">> Enter Your Name"}
+            </h2>
+            {game.status === "active" && (
+              <div className="mb-4 p-3 bg-yellow-600/20 border-2 border-yellow-600">
+                <p className="text-[8px] font-['Press_Start_2P'] text-yellow-400">
+                  ⚡ Game already started! Join now to play
+                </p>
+              </div>
+            )}
             <form onSubmit={handleJoin} className="flex gap-4 mb-4">
               <input
                 type="text"
@@ -181,7 +198,7 @@ export default function GameLobbyPage() {
                 className="px-8 py-3 bg-[#3a9364] hover:bg-[#4ade80] hover:text-[#0a0a12] font-['Press_Start_2P'] text-xs uppercase transition-all disabled:opacity-50"
                 style={{ boxShadow: '4px 4px 0 0 #2d7a50' }}
               >
-                {isJoining ? "..." : "Join"}
+                {isJoining ? "..." : game.status === "active" ? "Join Now" : "Join"}
               </button>
             </form>
             {!user && (
