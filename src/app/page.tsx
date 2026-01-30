@@ -10,6 +10,7 @@ import Link from "next/link";
 import { ImageUpload } from "@/components/upload";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { gameTemplates, type GameTemplate } from "@/data/templates";
+import { GoogleFontSelector } from "@/components/google-font-selector";
 
 function HomeContent() {
   const router = useRouter();
@@ -536,6 +537,13 @@ function CreateGameModal({ onClose }: { onClose: () => void }) {
     setNewAssetName("");
   };
 
+  const handleGoogleFontSelect = async (fontName: string, fontUrl: string) => {
+    setPendingAssets([
+      ...pendingAssets,
+      { name: fontName, url: fontUrl, type: "font" },
+    ]);
+  };
+
   const removeAsset = (index: number) => {
     setPendingAssets(pendingAssets.filter((_, i) => i !== index));
   };
@@ -570,14 +578,37 @@ function CreateGameModal({ onClose }: { onClose: () => void }) {
     setRequirements(template.requirements || "");
 
     // Add logo as a pending asset
-    setPendingAssets([
+    const assets: PendingAsset[] = [
       {
         name: `${template.name} Logo`,
         url: template.logoUrl,
         type: "image",
       },
-    ]);
+    ];
 
+    // Add fonts as pending assets (skip common system fonts)
+    const systemFonts = [
+      "Arial", "Helvetica", "Times New Roman", "Times", "Courier New",
+      "Courier", "Verdana", "Georgia", "Palatino", "Garamond",
+      "Bookman", "Comic Sans MS", "Trebuchet MS", "Impact"
+    ];
+
+    if (template.fonts && template.fonts.length > 0) {
+      template.fonts.forEach((fontName) => {
+        // Skip system fonts
+        if (!systemFonts.includes(fontName)) {
+          const fontFamily = fontName.replace(/ /g, "+");
+          const fontUrl = `https://fonts.googleapis.com/css2?family=${fontFamily}:wght@400;700&display=swap`;
+          assets.push({
+            name: fontName,
+            url: fontUrl,
+            type: "font",
+          });
+        }
+      });
+    }
+
+    setPendingAssets(assets);
     setShowTemplates(false);
   };
 
@@ -804,7 +835,11 @@ function CreateGameModal({ onClose }: { onClose: () => void }) {
                   <div key={index} className="flex items-center justify-between bg-gray-800 rounded-lg px-3 py-2">
                     <div className="flex items-center gap-3">
                       <span className="text-sm">{asset.name}</span>
-                      <span className="text-xs text-gray-500">{asset.type}</span>
+                      {asset.type === "font" ? (
+                        <span className="text-xs text-purple-400">Auto-loaded</span>
+                      ) : (
+                        <span className="text-xs text-gray-500">{asset.type}</span>
+                      )}
                     </div>
                     <button
                       type="button"
@@ -819,40 +854,54 @@ function CreateGameModal({ onClose }: { onClose: () => void }) {
             )}
 
             {/* Add asset form */}
-            <div className="flex gap-2 items-center">
-              <input
-                type="text"
-                value={newAssetName}
-                onChange={(e) => setNewAssetName(e.target.value)}
-                placeholder="Asset name"
-                className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
-              />
-              <select
-                value={newAssetType}
-                onChange={(e) => setNewAssetType(e.target.value as "image" | "font" | "other")}
-                className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
-              >
-                <option value="image">Image</option>
-                <option value="font">Font</option>
-                <option value="other">Other</option>
-              </select>
-              <label className="inline-flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-500 rounded-lg cursor-pointer text-sm transition">
-                <input
-                  ref={assetFileInputRef}
-                  type="file"
-                  onChange={handleAssetFileChange}
-                  className="hidden"
+            <div className="space-y-3">
+              <div className="flex gap-2 items-center">
+                {newAssetType !== "font" && (
+                  <input
+                    type="text"
+                    value={newAssetName}
+                    onChange={(e) => setNewAssetName(e.target.value)}
+                    placeholder="Asset name"
+                    className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+                  />
+                )}
+                <select
+                  value={newAssetType}
+                  onChange={(e) => setNewAssetType(e.target.value as "image" | "font" | "other")}
+                  className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+                >
+                  <option value="image">Image</option>
+                  <option value="font">Font</option>
+                  <option value="other">Other</option>
+                </select>
+                {newAssetType !== "font" && (
+                  <label className="inline-flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-500 rounded-lg cursor-pointer text-sm transition">
+                    <input
+                      ref={assetFileInputRef}
+                      type="file"
+                      onChange={handleAssetFileChange}
+                      className="hidden"
+                      disabled={isUploadingAsset}
+                    />
+                    {isUploadingAsset ? (
+                      <>
+                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Uploading...</span>
+                      </>
+                    ) : (
+                      <span>Choose File</span>
+                    )}
+                  </label>
+                )}
+              </div>
+
+              {/* Google Font Selector */}
+              {newAssetType === "font" && (
+                <GoogleFontSelector
+                  onSelect={handleGoogleFontSelect}
                   disabled={isUploadingAsset}
                 />
-                {isUploadingAsset ? (
-                  <>
-                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Uploading...</span>
-                  </>
-                ) : (
-                  <span>Choose File</span>
-                )}
-              </label>
+              )}
             </div>
           </div>
 
