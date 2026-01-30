@@ -27,16 +27,7 @@ export const gameTemplates: GameTemplate[] = [
       { name: "White", hex: "#FFFFFF" },
     ],
     fonts: ["Georgia"],
-    requirements: `Font:
-- Georgia (System font - Mac & Windows)
-
-Colors (4 total):
-• Cream (#FDF8F3) - Page background
-• Dark Brown (#5C3D2E) - Headings, buttons, borders
-• Medium Brown (#8B5E3C) - Body text, footer
-• White (#FFFFFF) - Card backgrounds, button text
-
-Emojis Used:
+    requirements: `Emojis Used:
 • Custom Furniture: 🪑 (chair)
 • Home Repairs: 🔨 (hammer)
 • Restoration: ✨ (sparkles)
