@@ -461,10 +461,19 @@ export default function PlayPage() {
                 style={{ boxShadow: '4px 4px 0 0 #2d7a50' }}>
                 {assets.map((asset) => (
                   <div key={asset._id} className="flex items-center gap-3">
-                    <code className="text-[#4ade80] font-bold">/a/{asset.shortCode}</code>
-                    <span className="text-[#ff6b6b]">&gt;</span>
-                    <span className="text-[#ffffff]">{asset.name}</span>
-                    <span className="text-[#666] uppercase">({asset.type})</span>
+                    {asset.type === "font" ? (
+                      <>
+                        <code className="text-purple-400 font-bold">font-family: '{asset.name}';</code>
+                        <span className="text-[#666] uppercase">(auto-loaded)</span>
+                      </>
+                    ) : (
+                      <>
+                        <code className="text-[#4ade80] font-bold">/a/{asset.shortCode}</code>
+                        <span className="text-[#ff6b6b]">&gt;</span>
+                        <span className="text-[#ffffff]">{asset.name}</span>
+                        <span className="text-[#666] uppercase">({asset.type})</span>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>
