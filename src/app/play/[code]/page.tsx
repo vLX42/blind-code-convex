@@ -265,10 +265,17 @@ export default function PlayPage() {
 
   // Render HTML preview in iframe
   const renderPreview = (htmlContent: string) => {
+    // Get Google Font links from assets
+    const fontLinks = assets
+      ?.filter((asset) => asset.type === "font" && asset.url.includes("fonts.googleapis.com"))
+      .map((asset) => `<link href="${asset.url}" rel="stylesheet">`)
+      .join("\n") || "";
+
     const doc = `
       <!DOCTYPE html>
       <html>
         <head>
+          ${fontLinks}
           <style>
             body { margin: 0; padding: 0; background: white; }
           </style>

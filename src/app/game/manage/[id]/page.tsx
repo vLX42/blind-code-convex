@@ -45,7 +45,6 @@ export default function GameManagePage() {
   const [newAssetType, setNewAssetType] = useState<"image" | "font" | "other">(
     "image",
   );
-  const [fontSource, setFontSource] = useState<"upload" | "google">("upload");
   const [isUploading, setIsUploading] = useState(false);
   const assetFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -223,16 +222,12 @@ export default function GameManagePage() {
   };
 
   const handleGoogleFontSelect = async (fontName: string, fontUrl: string) => {
-    const assetName = newAssetName.trim() || fontName;
-
     await addAsset({
       gameId,
-      name: assetName,
+      name: fontName,
       url: fontUrl,
       type: "font",
     });
-
-    setNewAssetName("");
   };
 
   // Edit mode handlers
@@ -834,20 +829,19 @@ export default function GameManagePage() {
           {/* Add Asset Form */}
           <div className="mb-6">
             <div className="flex flex-wrap items-center gap-3 mb-3">
-              <input
-                type="text"
-                value={newAssetName}
-                onChange={(e) => setNewAssetName(e.target.value)}
-                placeholder="Asset name"
-                className="w-48 bg-[#1a1a2e] border-2 border-[#3a9364] px-4 py-2 text-sm focus:outline-none focus:border-[#4ade80]"
-              />
+              {newAssetType !== "font" && (
+                <input
+                  type="text"
+                  value={newAssetName}
+                  onChange={(e) => setNewAssetName(e.target.value)}
+                  placeholder="Asset name"
+                  className="w-48 bg-[#1a1a2e] border-2 border-[#3a9364] px-4 py-2 text-sm focus:outline-none focus:border-[#4ade80]"
+                />
+              )}
               <select
                 value={newAssetType}
                 onChange={(e) => {
                   setNewAssetType(e.target.value as "image" | "font" | "other");
-                  if (e.target.value === "font") {
-                    setFontSource("google");
-                  }
                 }}
                 className="w-28 bg-[#1a1a2e] border-2 border-[#3a9364] px-4 py-2 text-sm focus:outline-none focus:border-[#4ade80]"
               >
@@ -856,34 +850,8 @@ export default function GameManagePage() {
                 <option value="other">Other</option>
               </select>
 
-              {/* Show font source selector only for font type */}
-              {newAssetType === "font" && (
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setFontSource("google")}
-                    className={`px-3 py-2 text-[8px] font-['Press_Start_2P'] uppercase ${
-                      fontSource === "google"
-                        ? "bg-[#3a9364] text-white"
-                        : "bg-[#1a1a2e] border border-[#3a9364] text-gray-400"
-                    }`}
-                  >
-                    Google Font
-                  </button>
-                  <button
-                    onClick={() => setFontSource("upload")}
-                    className={`px-3 py-2 text-[8px] font-['Press_Start_2P'] uppercase ${
-                      fontSource === "upload"
-                        ? "bg-[#3a9364] text-white"
-                        : "bg-[#1a1a2e] border border-[#3a9364] text-gray-400"
-                    }`}
-                  >
-                    Upload File
-                  </button>
-                </div>
-              )}
-
-              {/* Show upload button for non-Google font sources */}
-              {(newAssetType !== "font" || fontSource === "upload") && (
+              {/* Show upload button only for non-font types */}
+              {newAssetType !== "font" && (
                 <label
                   className="inline-flex items-center gap-2 px-4 py-2 bg-[#3a9364] hover:bg-[#4ade80] hover:text-[#0a0a12] cursor-pointer transition font-['Press_Start_2P'] text-[8px] uppercase"
                   style={{ boxShadow: "3px 3px 0 0 #2d7a50" }}
@@ -907,9 +875,12 @@ export default function GameManagePage() {
               )}
             </div>
 
-            {/* Google Font Selector */}
-            {newAssetType === "font" && fontSource === "google" && (
+            {/* Google Font Selector - only shown for font type */}
+            {newAssetType === "font" && (
               <div className="mt-3">
+                <p className="text-[8px] font-['Press_Start_2P'] text-gray-400 mb-2">
+                  Select a Google Font. It will be auto-loaded in preview.
+                </p>
                 <GoogleFontSelector
                   onSelect={handleGoogleFontSelect}
                   disabled={isUploading}
@@ -930,22 +901,30 @@ export default function GameManagePage() {
                     <span className="text-xs font-['Press_Start_2P'] text-[#4ade80]">
                       {asset.name}
                     </span>
-                    <code className="text-[10px] text-[#0df] bg-[#0a0a12] px-2 py-1 border border-[#0df]">
-                      /a/{asset.shortCode}
-                    </code>
+                    {asset.type === "font" ? (
+                      <span className="text-[10px] text-purple-400 bg-[#0a0a12] px-2 py-1 border border-purple-400">
+                        Auto-loaded (use: font-family: '{asset.name}')
+                      </span>
+                    ) : (
+                      <code className="text-[10px] text-[#0df] bg-[#0a0a12] px-2 py-1 border border-[#0df]">
+                        /a/{asset.shortCode}
+                      </code>
+                    )}
                     <span className="text-[10px] text-gray-500">
                       {asset.type}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <a
-                      href={asset.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[10px] font-['Press_Start_2P'] text-[#0df] hover:text-white"
-                    >
-                      View
-                    </a>
+                    {asset.type !== "font" && (
+                      <a
+                        href={asset.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[10px] font-['Press_Start_2P'] text-[#0df] hover:text-white"
+                      >
+                        View
+                      </a>
+                    )}
                     <button
                       onClick={() => removeAsset({ assetId: asset._id })}
                       className="text-[10px] font-['Press_Start_2P'] text-[#ff6b6b] hover:text-white"
@@ -963,7 +942,7 @@ export default function GameManagePage() {
           )}
 
           <p className="mt-4 text-[8px] font-['Press_Start_2P'] text-gray-500">
-            Use short URLs: <code className="text-[#4ade80]">/a/abc1</code>
+            Images/Other: <code className="text-[#4ade80]">/a/abc1</code> | Fonts: Auto-loaded
           </p>
         </div>
 

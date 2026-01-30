@@ -49,6 +49,7 @@ export function GoogleFontSelector({ onSelect, disabled }: GoogleFontSelectorPro
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFont, setSelectedFont] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
 
   const filteredFonts = useMemo(() => {
     return POPULAR_FONTS.filter((font) =>
@@ -56,16 +57,29 @@ export function GoogleFontSelector({ onSelect, disabled }: GoogleFontSelectorPro
     );
   }, [searchTerm]);
 
-  const handleFontSelect = (fontName: string) => {
+  const handleFontSelect = async (fontName: string) => {
     setSelectedFont(fontName);
     setSearchTerm(fontName);
     setIsOpen(false);
+  };
 
-    // Generate Google Fonts URL
-    const fontFamily = fontName.replace(/ /g, "+");
-    const fontUrl = `https://fonts.googleapis.com/css2?family=${fontFamily}:wght@400;700&display=swap`;
+  const handleAddFont = async () => {
+    if (!selectedFont) return;
 
-    onSelect(fontName, fontUrl);
+    setIsAdding(true);
+    try {
+      // Generate Google Fonts URL
+      const fontFamily = selectedFont.replace(/ /g, "+");
+      const fontUrl = `https://fonts.googleapis.com/css2?family=${fontFamily}:wght@400;700&display=swap`;
+
+      await onSelect(selectedFont, fontUrl);
+
+      // Reset after successful add
+      setSelectedFont("");
+      setSearchTerm("");
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   return (
@@ -80,21 +94,31 @@ export function GoogleFontSelector({ onSelect, disabled }: GoogleFontSelectorPro
           }}
           onFocus={() => setIsOpen(true)}
           placeholder="Search Google Fonts..."
-          disabled={disabled}
+          disabled={disabled || isAdding}
           className="flex-1 bg-[#1a1a2e] border-2 border-[#3a9364] px-4 py-2 text-sm focus:outline-none focus:border-[#4ade80] disabled:opacity-50"
         />
         {selectedFont && (
-          <button
-            onClick={() => {
-              setSearchTerm("");
-              setSelectedFont("");
-              setIsOpen(false);
-            }}
-            disabled={disabled}
-            className="px-3 py-2 bg-[#ff6b6b] hover:bg-[#ff5252] text-white text-xs disabled:opacity-50"
-          >
-            Clear
-          </button>
+          <>
+            <button
+              onClick={handleAddFont}
+              disabled={disabled || isAdding}
+              className="px-4 py-2 bg-[#3a9364] hover:bg-[#4ade80] hover:text-[#0a0a12] transition font-['Press_Start_2P'] text-[8px] uppercase disabled:opacity-50"
+              style={{ boxShadow: "3px 3px 0 0 #2d7a50" }}
+            >
+              {isAdding ? "Adding..." : "Add Font"}
+            </button>
+            <button
+              onClick={() => {
+                setSearchTerm("");
+                setSelectedFont("");
+                setIsOpen(false);
+              }}
+              disabled={disabled || isAdding}
+              className="px-3 py-2 bg-[#ff6b6b] hover:bg-[#ff5252] text-white text-xs disabled:opacity-50"
+            >
+              Clear
+            </button>
+          </>
         )}
       </div>
 

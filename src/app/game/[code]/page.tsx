@@ -275,9 +275,15 @@ export default function GameLobbyPage() {
                       className="flex items-center justify-between bg-[#1a1a2e] px-3 py-2 border-2 border-[#3a9364]"
                     >
                       <span className="text-xs text-white">{asset.name}</span>
-                      <code className="text-[10px] font-['Press_Start_2P'] text-[#4ade80]">
-                        /a/{asset.shortCode}
-                      </code>
+                      {asset.type === "font" ? (
+                        <span className="text-[8px] font-['Press_Start_2P'] text-purple-400">
+                          Auto-loaded
+                        </span>
+                      ) : (
+                        <code className="text-[10px] font-['Press_Start_2P'] text-[#4ade80]">
+                          /a/{asset.shortCode}
+                        </code>
+                      )}
                     </div>
                   ))}
                 </div>
