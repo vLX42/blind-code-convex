@@ -586,25 +586,16 @@ function CreateGameModal({ onClose }: { onClose: () => void }) {
       },
     ];
 
-    // Add fonts as pending assets (skip common system fonts)
-    const systemFonts = [
-      "Arial", "Helvetica", "Times New Roman", "Times", "Courier New",
-      "Courier", "Verdana", "Georgia", "Palatino", "Garamond",
-      "Bookman", "Comic Sans MS", "Trebuchet MS", "Impact"
-    ];
-
+    // Add fonts as pending assets
     if (template.fonts && template.fonts.length > 0) {
       template.fonts.forEach((fontName) => {
-        // Skip system fonts
-        if (!systemFonts.includes(fontName)) {
-          const fontFamily = fontName.replace(/ /g, "+");
-          const fontUrl = `https://fonts.googleapis.com/css2?family=${fontFamily}:wght@400;700&display=swap`;
-          assets.push({
-            name: fontName,
-            url: fontUrl,
-            type: "font",
-          });
-        }
+        const fontFamily = fontName.replace(/ /g, "+");
+        const fontUrl = `https://fonts.googleapis.com/css2?family=${fontFamily}:wght@400;700&display=swap`;
+        assets.push({
+          name: fontName,
+          url: fontUrl,
+          type: "font",
+        });
       });
     }
 
