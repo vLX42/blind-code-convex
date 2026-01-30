@@ -237,6 +237,7 @@ export default function ResultsPage() {
                       entryId={entry._id}
                       finalHtml={entry.html || ""}
                       targetDuration={15}
+                      gameId={game?._id}
                     />
                     <div className="mt-4 flex items-center gap-4">
                       <button
@@ -542,6 +543,7 @@ export default function ResultsPage() {
           onClose={() => setPlaybackEntry(null)}
           autoPlay={playbackEntry.autoPlay}
           targetDuration={15}
+          gameId={game?._id}
         />
       )}
     </div>

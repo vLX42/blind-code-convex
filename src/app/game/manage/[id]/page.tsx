@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { ImageUpload } from "@/components/upload";
 import { Playback } from "@/components/playback";
+import { GoogleFontSelector } from "@/components/google-font-selector";
 
 export default function GameManagePage() {
   const params = useParams();
@@ -44,6 +45,7 @@ export default function GameManagePage() {
   const [newAssetType, setNewAssetType] = useState<"image" | "font" | "other">(
     "image",
   );
+  const [fontSource, setFontSource] = useState<"upload" | "google">("upload");
   const [isUploading, setIsUploading] = useState(false);
   const assetFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -218,6 +220,19 @@ export default function GameManagePage() {
 
     setIsUploading(true);
     await startAssetUpload([file]);
+  };
+
+  const handleGoogleFontSelect = async (fontName: string, fontUrl: string) => {
+    const assetName = newAssetName.trim() || fontName;
+
+    await addAsset({
+      gameId,
+      name: assetName,
+      url: fontUrl,
+      type: "font",
+    });
+
+    setNewAssetName("");
   };
 
   // Edit mode handlers
@@ -818,7 +833,7 @@ export default function GameManagePage() {
 
           {/* Add Asset Form */}
           <div className="mb-6">
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3 mb-3">
               <input
                 type="text"
                 value={newAssetName}
@@ -828,36 +843,79 @@ export default function GameManagePage() {
               />
               <select
                 value={newAssetType}
-                onChange={(e) =>
-                  setNewAssetType(e.target.value as "image" | "font" | "other")
-                }
+                onChange={(e) => {
+                  setNewAssetType(e.target.value as "image" | "font" | "other");
+                  if (e.target.value === "font") {
+                    setFontSource("google");
+                  }
+                }}
                 className="w-28 bg-[#1a1a2e] border-2 border-[#3a9364] px-4 py-2 text-sm focus:outline-none focus:border-[#4ade80]"
               >
                 <option value="image">Image</option>
                 <option value="font">Font</option>
                 <option value="other">Other</option>
               </select>
-              <label
-                className="inline-flex items-center gap-2 px-4 py-2 bg-[#3a9364] hover:bg-[#4ade80] hover:text-[#0a0a12] cursor-pointer transition font-['Press_Start_2P'] text-[8px] uppercase"
-                style={{ boxShadow: "3px 3px 0 0 #2d7a50" }}
-              >
-                <input
-                  ref={assetFileInputRef}
-                  type="file"
-                  onChange={handleAssetFileChange}
-                  className="hidden"
+
+              {/* Show font source selector only for font type */}
+              {newAssetType === "font" && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setFontSource("google")}
+                    className={`px-3 py-2 text-[8px] font-['Press_Start_2P'] uppercase ${
+                      fontSource === "google"
+                        ? "bg-[#3a9364] text-white"
+                        : "bg-[#1a1a2e] border border-[#3a9364] text-gray-400"
+                    }`}
+                  >
+                    Google Font
+                  </button>
+                  <button
+                    onClick={() => setFontSource("upload")}
+                    className={`px-3 py-2 text-[8px] font-['Press_Start_2P'] uppercase ${
+                      fontSource === "upload"
+                        ? "bg-[#3a9364] text-white"
+                        : "bg-[#1a1a2e] border border-[#3a9364] text-gray-400"
+                    }`}
+                  >
+                    Upload File
+                  </button>
+                </div>
+              )}
+
+              {/* Show upload button for non-Google font sources */}
+              {(newAssetType !== "font" || fontSource === "upload") && (
+                <label
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-[#3a9364] hover:bg-[#4ade80] hover:text-[#0a0a12] cursor-pointer transition font-['Press_Start_2P'] text-[8px] uppercase"
+                  style={{ boxShadow: "3px 3px 0 0 #2d7a50" }}
+                >
+                  <input
+                    ref={assetFileInputRef}
+                    type="file"
+                    onChange={handleAssetFileChange}
+                    className="hidden"
+                    disabled={isUploading}
+                  />
+                  {isUploading ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Uploading...</span>
+                    </>
+                  ) : (
+                    <span>Upload</span>
+                  )}
+                </label>
+              )}
+            </div>
+
+            {/* Google Font Selector */}
+            {newAssetType === "font" && fontSource === "google" && (
+              <div className="mt-3">
+                <GoogleFontSelector
+                  onSelect={handleGoogleFontSelect}
                   disabled={isUploading}
                 />
-                {isUploading ? (
-                  <>
-                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Uploading...</span>
-                  </>
-                ) : (
-                  <span>Upload</span>
-                )}
-              </label>
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Assets List */}
@@ -1077,6 +1135,7 @@ export default function GameManagePage() {
           onClose={() => setPlaybackEntry(null)}
           autoPlay={playbackEntry.autoPlay}
           targetDuration={15}
+          gameId={gameId}
         />
       )}
 

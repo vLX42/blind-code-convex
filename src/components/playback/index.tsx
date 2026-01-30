@@ -11,10 +11,12 @@ interface PlaybackProps {
   onClose: () => void;
   autoPlay?: boolean; // Start playing automatically
   targetDuration?: number; // Target playback duration in seconds (e.g., 15 for 15 seconds)
+  gameId?: Id<"games">; // Optional game ID to load assets for font support
 }
 
-export function Playback({ entryId, playerName, onClose, autoPlay = false, targetDuration = 15 }: PlaybackProps) {
+export function Playback({ entryId, playerName, onClose, autoPlay = false, targetDuration = 15, gameId }: PlaybackProps) {
   const snapshots = useQuery(api.entries.getProgressSnapshots, { entryId });
+  const assets = useQuery(api.assets.getGameAssets, gameId ? { gameId } : "skip");
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -28,6 +30,26 @@ export function Playback({ entryId, playerName, onClose, autoPlay = false, targe
     [snapshots]
   );
   const currentSnapshot = sortedSnapshots[currentIndex];
+
+  // Extract Google Font URLs from assets
+  const googleFontLinks = useMemo(() => {
+    if (!assets) return "";
+    return assets
+      .filter((asset) => asset.type === "font" && asset.url.includes("fonts.googleapis.com"))
+      .map((asset) => `<link href="${asset.url}" rel="stylesheet">`)
+      .join("\n");
+  }, [assets]);
+
+  // Wrap HTML with Google Fonts
+  const wrapWithFonts = useCallback((html: string) => {
+    if (!googleFontLinks) return html;
+    // If HTML already has <head>, inject fonts there
+    if (html.includes("<head>")) {
+      return html.replace("<head>", `<head>\n${googleFontLinks}`);
+    }
+    // Otherwise, wrap it
+    return `<!DOCTYPE html><html><head>${googleFontLinks}</head><body>${html}</body></html>`;
+  }, [googleFontLinks]);
 
   // Calculate auto speed: play all snapshots in targetDuration seconds
   const autoSpeed = useMemo(() => {
@@ -158,7 +180,7 @@ export function Playback({ entryId, playerName, onClose, autoPlay = false, targe
           ) : (
             <div className="flex-1 bg-white">
               <iframe
-                srcDoc={currentSnapshot?.html || ""}
+                srcDoc={wrapWithFonts(currentSnapshot?.html || "")}
                 className="w-full h-full border-0"
                 title="Preview"
                 sandbox="allow-scripts"
@@ -171,7 +193,7 @@ export function Playback({ entryId, playerName, onClose, autoPlay = false, targe
             {showCode ? (
               <div className="flex-1 bg-white">
                 <iframe
-                  srcDoc={currentSnapshot?.html || ""}
+                  srcDoc={wrapWithFonts(currentSnapshot?.html || "")}
                   className="w-full h-full border-0"
                   title="Preview"
                   sandbox="allow-scripts"

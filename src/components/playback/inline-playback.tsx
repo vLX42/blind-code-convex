@@ -9,10 +9,12 @@ interface InlinePlaybackProps {
   entryId: Id<"entries">;
   finalHtml: string;
   targetDuration?: number; // Target playback duration in seconds
+  gameId?: Id<"games">; // Optional game ID to load assets for font support
 }
 
-export function InlinePlayback({ entryId, finalHtml, targetDuration = 15 }: InlinePlaybackProps) {
+export function InlinePlayback({ entryId, finalHtml, targetDuration = 15, gameId }: InlinePlaybackProps) {
   const snapshots = useQuery(api.entries.getProgressSnapshots, { entryId });
+  const assets = useQuery(api.assets.getGameAssets, gameId ? { gameId } : "skip");
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(-1); // -1 means show final result
@@ -35,6 +37,15 @@ export function InlinePlayback({ entryId, finalHtml, targetDuration = 15 }: Inli
   const currentHtml = currentIndex === -1
     ? finalHtml
     : (sortedSnapshots[currentIndex]?.html || "");
+
+  // Extract Google Font URLs from assets
+  const googleFontLinks = useMemo(() => {
+    if (!assets) return "";
+    return assets
+      .filter((asset) => asset.type === "font" && asset.url.includes("fonts.googleapis.com"))
+      .map((asset) => `<link href="${asset.url}" rel="stylesheet">`)
+      .join("\n");
+  }, [assets]);
 
   // Playback logic
   useEffect(() => {
@@ -76,11 +87,12 @@ export function InlinePlayback({ entryId, finalHtml, targetDuration = 15 }: Inli
     : hasPlayed ? 100 : 0;
 
   // Render HTML in iframe
-  const renderPreview = (html: string) => {
+  const renderPreview = useCallback((html: string) => {
     const doc = `
       <!DOCTYPE html>
       <html>
         <head>
+          ${googleFontLinks}
           <style>
             body { margin: 0; padding: 0; background: white; }
           </style>
@@ -89,7 +101,7 @@ export function InlinePlayback({ entryId, finalHtml, targetDuration = 15 }: Inli
       </html>
     `;
     return `data:text/html;charset=utf-8,${encodeURIComponent(doc)}`;
-  };
+  }, [googleFontLinks]);
 
   const hasSnapshots = sortedSnapshots.length > 0;
 
