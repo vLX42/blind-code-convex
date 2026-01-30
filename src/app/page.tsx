@@ -9,6 +9,7 @@ import { Id } from "../../convex/_generated/dataModel";
 import Link from "next/link";
 import { ImageUpload } from "@/components/upload";
 import { useUploadThing } from "@/lib/uploadthing-client";
+import { gameTemplates, type GameTemplate } from "@/data/templates";
 
 function HomeContent() {
   const router = useRouter();
@@ -436,6 +437,8 @@ function CreateGameModal({ onClose }: { onClose: () => void }) {
   const createGame = useMutation(api.games.createGame);
   const addAsset = useMutation(api.assets.addAsset);
 
+  const [selectedTemplate, setSelectedTemplate] = useState<GameTemplate | null>(null);
+  const [showTemplates, setShowTemplates] = useState(true);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [referenceImageUrl, setReferenceImageUrl] = useState("");
@@ -558,6 +561,35 @@ function CreateGameModal({ onClose }: { onClose: () => void }) {
     setHexColors(hexColors.filter((_, i) => i !== index));
   };
 
+  const applyTemplate = (template: GameTemplate) => {
+    setSelectedTemplate(template);
+    setTitle(template.name);
+    setDescription(template.description);
+    setReferenceImageUrl(template.referenceImageUrl);
+    setHexColors(template.colors);
+    setRequirements(template.requirements || "");
+
+    // Add logo as a pending asset
+    setPendingAssets([
+      {
+        name: `${template.name} Logo`,
+        url: template.logoUrl,
+        type: "image",
+      },
+    ]);
+
+    setShowTemplates(false);
+  };
+
+  const clearTemplate = () => {
+    setSelectedTemplate(null);
+    setTitle("");
+    setDescription("");
+    setReferenceImageUrl("");
+    setHexColors([{ name: "", hex: "" }]);
+    setRequirements("");
+  };
+
   return (
     <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
       <div className="bg-[#0a0a12] max-w-2xl w-full max-h-[90vh] overflow-y-auto border-4 border-[#3a9364]"
@@ -573,6 +605,94 @@ function CreateGameModal({ onClose }: { onClose: () => void }) {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Template Selection */}
+          {showTemplates && gameTemplates.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <label className="block text-[10px] font-['Press_Start_2P'] text-purple-400">
+                  {">> Start with Template"}
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowTemplates(false)}
+                  className="text-[8px] font-['Press_Start_2P'] text-gray-500 hover:text-white"
+                >
+                  Skip
+                </button>
+              </div>
+              <div className="grid gap-4">
+                {gameTemplates.map((template) => (
+                  <button
+                    key={template.id}
+                    type="button"
+                    onClick={() => applyTemplate(template)}
+                    className="bg-[#1a1a2e] border-2 border-[#3a9364] hover:border-purple-400 p-4 text-left transition-all group"
+                  >
+                    <div className="flex gap-4">
+                      <img
+                        src={template.logoUrl}
+                        alt={template.name}
+                        className="w-20 h-20 object-contain bg-white"
+                      />
+                      <div className="flex-1">
+                        <h3 className="text-sm font-['Press_Start_2P'] text-[#4ade80] mb-2 group-hover:text-purple-400">
+                          {template.name}
+                        </h3>
+                        <p className="text-[8px] text-gray-400 mb-2">
+                          {template.description}
+                        </p>
+                        <div className="flex gap-1">
+                          {template.colors.slice(0, 4).map((color, idx) => (
+                            <div
+                              key={idx}
+                              className="w-6 h-6 border border-gray-600"
+                              style={{ backgroundColor: color.hex }}
+                              title={color.name}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+              <div className="mt-4 text-center">
+                <button
+                  type="button"
+                  onClick={() => setShowTemplates(false)}
+                  className="text-[8px] font-['Press_Start_2P'] text-gray-500 hover:text-[#4ade80]"
+                >
+                  {"or create from scratch >>"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Template Badge */}
+          {selectedTemplate && (
+            <div className="bg-purple-600/20 border-2 border-purple-400 p-3 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <img
+                  src={selectedTemplate.logoUrl}
+                  alt={selectedTemplate.name}
+                  className="w-8 h-8 object-contain bg-white"
+                />
+                <span className="text-[8px] font-['Press_Start_2P'] text-purple-400">
+                  Using template: {selectedTemplate.name}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={clearTemplate}
+                className="text-[8px] font-['Press_Start_2P'] text-[#ff6b6b] hover:text-white"
+              >
+                Clear
+              </button>
+            </div>
+          )}
+
+          {!showTemplates && (
+            <>
           <div>
             <label className="block text-[10px] font-['Press_Start_2P'] text-[#ff6b6b] mb-3">Game Title</label>
             <input
@@ -750,23 +870,29 @@ function CreateGameModal({ onClose }: { onClose: () => void }) {
             />
           </div>
 
-          <div className="flex gap-4 pt-6">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-3 bg-[#1a1a2e] hover:bg-[#2a2a4e] font-['Press_Start_2P'] text-[10px] uppercase transition border-2 border-gray-600"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1 px-4 py-3 bg-[#3a9364] hover:bg-[#4ade80] hover:text-[#0a0a12] font-['Press_Start_2P'] text-[10px] uppercase transition disabled:opacity-50 disabled:hover:bg-[#3a9364] disabled:hover:text-white"
-              style={{ boxShadow: '4px 4px 0 0 #2d7a50' }}
-            >
-              {isSubmitting ? "Creating..." : "Create"}
-            </button>
-          </div>
+          </>
+          )}
+
+          {/* Submit Buttons */}
+          {!showTemplates && (
+            <div className="flex gap-4 pt-6">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-4 py-3 bg-[#1a1a2e] hover:bg-[#2a2a4e] font-['Press_Start_2P'] text-[10px] uppercase transition border-2 border-gray-600"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="flex-1 px-4 py-3 bg-[#3a9364] hover:bg-[#4ade80] hover:text-[#0a0a12] font-['Press_Start_2P'] text-[10px] uppercase transition disabled:opacity-50 disabled:hover:bg-[#3a9364] disabled:hover:text-white"
+                style={{ boxShadow: '4px 4px 0 0 #2d7a50' }}
+              >
+                {isSubmitting ? "Creating..." : "Create"}
+              </button>
+            </div>
+          )}
         </form>
       </div>
     </div>
