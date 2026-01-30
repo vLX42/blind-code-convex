@@ -1,0 +1,26 @@
+{
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "blind-code.vlx.dk"
+        }
+      ],
+      "destination": "https://www.blind-code.work/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.blind-code.vlx.dk"
+        }
+      ],
+      "destination": "https://www.blind-code.work/:path*",
+      "permanent": true
+    }
+  ]
+}
