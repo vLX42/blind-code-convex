@@ -470,6 +470,8 @@ function CreateGameModal({ onClose }: { onClose: () => void }) {
     },
   });
 
+  const { startUpload: startReferenceUpload } = useUploadThing("referenceImage");
+
   const handleAssetFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -569,38 +571,60 @@ function CreateGameModal({ onClose }: { onClose: () => void }) {
     setHexColors(hexColors.filter((_, i) => i !== index));
   };
 
-  const applyTemplate = (template: GameTemplate) => {
+  const applyTemplate = async (template: GameTemplate) => {
     setSelectedTemplate(template);
     setTitle(template.name);
     setDescription(template.description);
-    setReferenceImageUrl(template.referenceImageUrl);
     setHexColors(template.colors);
     setRequirements(template.requirements || "");
+    setIsSubmitting(true);
 
-    // Add logo as a pending asset
-    const assets: PendingAsset[] = [
-      {
-        name: `${template.name} Logo`,
-        url: template.logoUrl,
-        type: "image",
-      },
-    ];
+    try {
+      // Upload reference image to UploadThing
+      const referenceBlob = await fetch(template.referenceImageUrl).then(r => r.blob());
+      const referenceFile = new File([referenceBlob], "reference.png", { type: "image/png" });
+      const referenceResult = await startReferenceUpload([referenceFile]);
 
-    // Add fonts as pending assets
-    if (template.fonts && template.fonts.length > 0) {
-      template.fonts.forEach((fontName) => {
-        const fontFamily = fontName.replace(/ /g, "+");
-        const fontUrl = `https://fonts.googleapis.com/css2?family=${fontFamily}:wght@400;700&display=swap`;
+      if (referenceResult?.[0]?.url) {
+        setReferenceImageUrl(referenceResult[0].url);
+      }
+
+      // Upload logo to UploadThing
+      const logoBlob = await fetch(template.logoUrl).then(r => r.blob());
+      const logoFile = new File([logoBlob], "logo.png", { type: "image/png" });
+      const logoResult = await startAssetUpload([logoFile]);
+
+      // Add uploaded logo as pending asset
+      const assets: PendingAsset[] = [];
+      if (logoResult?.[0]?.url) {
         assets.push({
-          name: fontName,
-          url: fontUrl,
-          type: "font",
+          name: `${template.name} Logo`,
+          url: logoResult[0].url,
+          type: "image",
         });
-      });
-    }
+      }
 
-    setPendingAssets(assets);
-    setShowTemplates(false);
+      // Add fonts as pending assets
+      if (template.fonts && template.fonts.length > 0) {
+        template.fonts.forEach((fontName) => {
+          const fontFamily = fontName.replace(/ /g, "+");
+          const fontUrl = `https://fonts.googleapis.com/css2?family=${fontFamily}:wght@400;700&display=swap`;
+          assets.push({
+            name: fontName,
+            url: fontUrl,
+            type: "font",
+          });
+        });
+      }
+
+      setPendingAssets(assets);
+    } catch (error) {
+      console.error("Failed to upload template images:", error);
+      alert("Failed to upload template images. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+      setShowTemplates(false);
+    }
   };
 
   const clearTemplate = () => {
@@ -648,7 +672,8 @@ function CreateGameModal({ onClose }: { onClose: () => void }) {
                     key={template.id}
                     type="button"
                     onClick={() => applyTemplate(template)}
-                    className="bg-[#1a1a2e] border-2 border-[#3a9364] hover:border-purple-400 p-4 text-left transition-all group"
+                    disabled={isSubmitting}
+                    className="bg-[#1a1a2e] border-2 border-[#3a9364] hover:border-purple-400 p-4 text-left transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <div className="flex gap-4">
                       <img

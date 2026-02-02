@@ -18,8 +18,8 @@ export const gameTemplates: GameTemplate[] = [
     id: "woodman-inc",
     name: "Woodman Inc.",
     description: "A classic woodworking company website with warm brown tones and elegant typography. Features a hero section, service cards with emojis, and a professional layout.",
-    logoUrl: "https://www.blind-code.work/templates/woodman-inc/logo.png",
-    referenceImageUrl: "https://www.blind-code.work/templates/woodman-inc/reference.png",
+    logoUrl: "/templates/woodman-inc/logo.png",
+    referenceImageUrl: "/templates/woodman-inc/reference.png",
     colors: [
       { name: "Cream", hex: "#FDF8F3" },
       { name: "Dark Brown", hex: "#5C3D2E" },
