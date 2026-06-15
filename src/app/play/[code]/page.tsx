@@ -86,6 +86,7 @@ export default function PlayPage() {
   const updateEntry = useMutation(api.entries.updateEntry);
   const saveSnapshot = useMutation(api.entries.saveProgressSnapshot);
   const submitEntry = useMutation(api.entries.submitEntry);
+  const updatePlayerState = useMutation(api.entries.updatePlayerState);
   const autoEndGame = useMutation(api.games.autoEndGameIfTimeUp);
 
   // Get all submitted entries for the waiting slideshow
@@ -230,6 +231,19 @@ export default function PlayPage() {
 
     return keystrokePoints + streakBonus + powerModeBonus;
   };
+
+  // Push live state often so the host's overview shows score, streak, and
+  // power mode in near real time.
+  useInterval(() => {
+    if (entry?._id && game?.status === "active" && !hasSubmitted) {
+      updatePlayerState({
+        entryId: entry._id,
+        liveScore: calculateScore(),
+        currentStreak: streak,
+        powerMode,
+      });
+    }
+  }, 2000);
 
   // Submit entry
   const handleSubmit = async () => {

@@ -607,6 +607,75 @@ export default function GameManagePage() {
           </div>
         )}
 
+        {/* Live players overview — scores, streaks, and power mode in real time */}
+        {game.status === "active" && entries && (
+          <div
+            className="bg-[#0a0a12] border-4 border-[#3a9364] p-6 mb-8"
+            style={{ boxShadow: "6px 6px 0 0 #2d7a50" }}
+          >
+            <h2 className="text-sm font-['Press_Start_2P'] text-[#ff6b6b] mb-6">
+              {">> Live Players"}{" "}
+              <span className="text-[#4ade80]">({entries.length})</span>
+            </h2>
+            {entries.length > 0 ? (
+              <div className="space-y-3">
+                {[...entries]
+                  .sort((a, b) => (b.liveScore ?? 0) - (a.liveScore ?? 0))
+                  .map((e, i) => (
+                    <div
+                      key={e._id}
+                      className={`flex items-center justify-between gap-3 bg-[#1a1a2e] border-2 px-4 py-3 ${
+                        e.powerMode ? "border-yellow-400" : "border-[#3a9364]"
+                      }`}
+                      style={
+                        e.powerMode
+                          ? { boxShadow: "0 0 16px rgba(250,204,21,.45)" }
+                          : {}
+                      }
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="text-[10px] font-['Press_Start_2P'] text-gray-500 w-5">
+                          {i + 1}
+                        </span>
+                        <span className="text-xs font-['Press_Start_2P'] text-[#4ade80] truncate">
+                          {e.player?.handle ?? "—"}
+                        </span>
+                        {e.powerMode && (
+                          <span className="text-[8px] font-['Press_Start_2P'] text-yellow-300 bg-yellow-900/40 border border-yellow-500 px-2 py-1 animate-pulse whitespace-nowrap">
+                            ⚡ POWER
+                          </span>
+                        )}
+                        {e.isSubmitted && (
+                          <span className="text-[8px] font-['Press_Start_2P'] text-gray-400 border border-gray-600 px-2 py-1">
+                            DONE
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-4 text-[8px] font-['Press_Start_2P'] whitespace-nowrap">
+                        <span className="text-gray-400">
+                          Streak{" "}
+                          <span className="text-[#0df]">
+                            {e.currentStreak ?? 0}
+                          </span>
+                        </span>
+                        <span className="text-gray-400">
+                          Pts{" "}
+                          <span className="text-[#4ade80] text-[12px]">
+                            {e.liveScore ?? e.totalScore ?? 0}
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <p className="text-[10px] font-['Press_Start_2P'] text-gray-500">
+                No players have joined yet.
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Voting control panel (host) — appears once the game has ended */}
         {user?.id && (
           <HostVotingPanel
@@ -839,7 +908,8 @@ export default function GameManagePage() {
           </div>
         )}
 
-        {/* Players */}
+        {/* Players (hidden while active — the Live Players overview covers it) */}
+        {game.status !== "active" && (
         <div
           className="bg-[#0a0a12] border-4 border-[#3a9364] p-6 mb-8"
           style={{ boxShadow: "6px 6px 0 0 #2d7a50" }}
@@ -883,6 +953,7 @@ export default function GameManagePage() {
             </p>
           )}
         </div>
+        )}
 
         {/* Assets Management */}
         <div

@@ -56,6 +56,27 @@ export const updateEntry = mutation({
   },
 });
 
+// Push live play state (called frequently during the game) so the host can
+// watch a real-time overview of scores, streaks, and power mode.
+export const updatePlayerState = mutation({
+  args: {
+    entryId: v.id("entries"),
+    liveScore: v.number(),
+    currentStreak: v.number(),
+    powerMode: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    const entry = await ctx.db.get(args.entryId);
+    if (!entry || entry.isSubmitted) return;
+    await ctx.db.patch(args.entryId, {
+      liveScore: args.liveScore,
+      currentStreak: args.currentStreak,
+      powerMode: args.powerMode,
+      maxStreak: Math.max(entry.maxStreak, args.currentStreak),
+    });
+  },
+});
+
 // Save progress snapshot for playback
 export const saveProgressSnapshot = mutation({
   args: {

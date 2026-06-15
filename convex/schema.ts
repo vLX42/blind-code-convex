@@ -89,6 +89,10 @@ export default defineSchema({
     totalScore: v.number(), // Calculated score
     maxStreak: v.number(), // Highest streak achieved
     totalKeystrokes: v.number(),
+    // Live state pushed during play so the host can watch a real-time overview.
+    liveScore: v.optional(v.number()), // current score while coding
+    currentStreak: v.optional(v.number()), // current (not max) streak
+    powerMode: v.optional(v.boolean()), // currently in power mode
   })
     .index("by_game", ["gameId"])
     .index("by_player", ["playerId"]),
