@@ -11,6 +11,7 @@ import { useUploadThing } from "@/lib/uploadthing-client";
 import { ImageUpload } from "@/components/upload";
 import { Playback } from "@/components/playback";
 import { GoogleFontSelector } from "@/components/google-font-selector";
+import { HostVotingPanel } from "@/components/participant/host-voting-panel";
 
 export default function GameManagePage() {
   const params = useParams();
@@ -303,8 +304,9 @@ export default function GameManagePage() {
 
   const handleEndGame = async () => {
     if (!user?.id) return;
+    // Stay on the manage page — the voting control panel appears here so the
+    // host can choose a voting style and drive the presentation/voting/reveal.
     await endGame({ gameId, creatorId: user.id as Id<"users"> });
-    router.push(`/results/${game.shortCode}`);
   };
 
   const handleFinishGame = async () => {
@@ -499,15 +501,6 @@ export default function GameManagePage() {
                   End & Vote
                 </button>
               )}
-              {game.status === "voting" && (
-                <button
-                  onClick={handleFinishGame}
-                  className="px-4 py-2 bg-gray-600 hover:bg-gray-500 font-['Press_Start_2P'] text-[8px] uppercase transition"
-                  style={{ boxShadow: "3px 3px 0 0 #333" }}
-                >
-                  Finish
-                </button>
-              )}
               {(game.status === "active" || game.status === "voting" || game.status === "finished") && (
                 <button
                   onClick={() => setShowResetConfirm(true)}
@@ -552,6 +545,19 @@ export default function GameManagePage() {
             </p>
           </div>
         </div>
+
+        {/* Voting control panel (host) — appears once the game has ended */}
+        {user?.id && (
+          <HostVotingPanel
+            gameId={game._id}
+            shortCode={game.shortCode}
+            status={game.status}
+            votingMode={game.votingMode}
+            votingPhase={game.votingPhase}
+            userId={user.id as Id<"users">}
+            context="manage"
+          />
+        )}
 
         {/* Edit Game Form */}
         {isEditing && (

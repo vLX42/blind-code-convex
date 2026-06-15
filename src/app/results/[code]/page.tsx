@@ -13,6 +13,7 @@ import { InlinePlayback } from "@/components/playback/inline-playback";
 import { Presentation, type AnonymousEntry } from "@/components/participant/presentation";
 import { ParticipantVoting } from "@/components/participant/voting";
 import { ParticipantReveal, type RevealResult } from "@/components/participant/reveal";
+import { HostVotingPanel } from "@/components/participant/host-voting-panel";
 
 type ViewMode = "submissions" | "voting" | "leaderboard" | "reveal";
 
@@ -58,12 +59,10 @@ export default function ResultsPage() {
   const isCreator = user?.id === game?.creatorId;
 
   // ----- Participant (peer) voting -----
-  const votingMode = game?.votingMode ?? "classic";
+  // Undefined until the host picks a style; the HostVotingPanel prompts for it.
+  const votingMode = game?.votingMode;
   const votingPhase = game?.votingPhase;
 
-  const setVotingMode = useMutation(api.games.setVotingMode);
-  const setVotingPhase = useMutation(api.games.setVotingPhase);
-  const finishGame = useMutation(api.games.finishGame);
   const joinAsVoter = useMutation(api.players.joinAsVoter);
 
   // Resolve the current viewer's player identity (for casting peer votes).
@@ -85,10 +84,6 @@ export default function ResultsPage() {
   );
   const myPlayer = playerByUser || playerById;
 
-  const voteStatus = useQuery(
-    api.participantVotes.getParticipantVoteStatus,
-    game?._id && votingMode === "participant" ? { gameId: game._id } : "skip"
-  );
   const participantResults = useQuery(
     api.participantVotes.getParticipantResults,
     game?._id && votingMode === "participant" ? { gameId: game._id } : "skip"
@@ -115,14 +110,6 @@ export default function ResultsPage() {
   const myOwnEntryId =
     (entries ?? []).find((e) => e.playerId === myPlayer?._id)?._id ?? null;
 
-  const handleSetMode = async (mode: "classic" | "participant") => {
-    if (!game?._id || !user?.id) return;
-    await setVotingMode({ gameId: game._id, creatorId: user.id as Id<"users">, mode });
-  };
-  const handleSetPhase = async (phase: "presentation" | "voting" | "reveal") => {
-    if (!game?._id || !user?.id) return;
-    await setVotingPhase({ gameId: game._id, creatorId: user.id as Id<"users">, phase });
-  };
   const handleJoinAsVoter = async () => {
     if (!game?._id || !user?.id) return;
     await joinAsVoter({
@@ -130,10 +117,6 @@ export default function ResultsPage() {
       userId: user.id as Id<"users">,
       handle: user.username || "Host",
     });
-  };
-  const handleFinishGame = async () => {
-    if (!game?._id || !user?.id) return;
-    await finishGame({ gameId: game._id, creatorId: user.id as Id<"users"> });
   };
 
   // Reset view mode if user loses voting permission or logs out
@@ -239,91 +222,17 @@ export default function ResultsPage() {
       </header>
 
       <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Host voting controls */}
-        {isCreator && (
-          <div
-            className="bg-[#0a0a12] border-4 border-purple-600 p-4 mb-8"
-            style={{ boxShadow: "6px 6px 0 0 #553399" }}
-          >
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <span className="text-[8px] font-['Press_Start_2P'] text-purple-300 uppercase">
-                  Voting mode
-                </span>
-                <button
-                  onClick={() => handleSetMode("classic")}
-                  className={`px-3 py-2 font-['Press_Start_2P'] text-[8px] uppercase transition ${
-                    votingMode === "classic"
-                      ? "bg-purple-600 text-white"
-                      : "bg-[#1a1a2e] border-2 border-purple-600 text-purple-300 hover:bg-[#2a2a4e]"
-                  }`}
-                >
-                  Classic
-                </button>
-                <button
-                  onClick={() => handleSetMode("participant")}
-                  className={`px-3 py-2 font-['Press_Start_2P'] text-[8px] uppercase transition ${
-                    votingMode === "participant"
-                      ? "bg-purple-600 text-white"
-                      : "bg-[#1a1a2e] border-2 border-purple-600 text-purple-300 hover:bg-[#2a2a4e]"
-                  }`}
-                >
-                  Participant
-                </button>
-              </div>
-
-              {votingMode === "participant" && game.status === "voting" && (
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="text-[10px] font-['Press_Start_2P'] text-[#4ade80]">
-                    Voted: {voteStatus?.votedCount ?? 0}/{voteStatus?.eligibleCount ?? 0}
-                  </span>
-                  {votingPhase === "presentation" && (
-                    <button
-                      onClick={() => handleSetPhase("voting")}
-                      className="px-4 py-2 font-['Press_Start_2P'] text-[8px] uppercase bg-[#3a9364] hover:bg-[#4ade80] hover:text-[#0a0a12] transition"
-                      style={{ boxShadow: "3px 3px 0 0 #2d7a50" }}
-                    >
-                      Open Voting
-                    </button>
-                  )}
-                  {votingPhase === "voting" && (
-                    <>
-                      <button
-                        onClick={() => handleSetPhase("presentation")}
-                        className="px-3 py-2 font-['Press_Start_2P'] text-[8px] uppercase bg-[#1a1a2e] border-2 border-[#3a9364] text-[#4ade80] hover:bg-[#2a2a4e] transition"
-                      >
-                        {"<- Present"}
-                      </button>
-                      <button
-                        onClick={() => handleSetPhase("reveal")}
-                        className="px-4 py-2 font-['Press_Start_2P'] text-[8px] uppercase bg-gradient-to-r from-[#ff6b6b] to-[#0df] text-[#0a0a12] hover:from-[#ff8888] hover:to-[#66ffff] transition"
-                        style={{ boxShadow: "3px 3px 0 0 #993333" }}
-                      >
-                        Close & Reveal
-                      </button>
-                    </>
-                  )}
-                  {votingPhase === "reveal" && (
-                    <>
-                      <button
-                        onClick={() => handleSetPhase("voting")}
-                        className="px-3 py-2 font-['Press_Start_2P'] text-[8px] uppercase bg-[#1a1a2e] border-2 border-[#3a9364] text-[#4ade80] hover:bg-[#2a2a4e] transition"
-                      >
-                        Re-open Voting
-                      </button>
-                      <button
-                        onClick={handleFinishGame}
-                        className="px-4 py-2 font-['Press_Start_2P'] text-[8px] uppercase bg-yellow-600 hover:bg-yellow-500 text-[#0a0a12] transition"
-                        style={{ boxShadow: "3px 3px 0 0 #997700" }}
-                      >
-                        Finish Game
-                      </button>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
+        {/* Host voting controls — mode chooser + guided stepper */}
+        {isCreator && user?.id && (
+          <HostVotingPanel
+            gameId={game._id}
+            shortCode={game.shortCode}
+            status={game.status}
+            votingMode={game.votingMode}
+            votingPhase={game.votingPhase}
+            userId={user.id as Id<"users">}
+            context="results"
+          />
         )}
 
         {/* ===== Participant (peer) voting ===== */}
@@ -429,7 +338,7 @@ export default function ResultsPage() {
               />
             )}
           </div>
-        ) : (
+        ) : votingMode === "classic" ? (
         <>
         {/* View Mode Tabs */}
         <div className="flex flex-wrap gap-3 mb-8">
@@ -808,6 +717,22 @@ export default function ResultsPage() {
           </div>
         )}
         </>
+        ) : (
+          // No voting style chosen yet.
+          <div
+            className="bg-[#0a0a12] border-4 border-[#3a9364] p-10 text-center"
+            style={{ boxShadow: "6px 6px 0 0 #2d7a50" }}
+          >
+            <div className="text-4xl mb-4">🗳️</div>
+            <p className="text-[11px] font-['Press_Start_2P'] text-[#4ade80] mb-3">
+              {isCreator ? "Pick a voting style above to begin" : "Voting hasn't started yet"}
+            </p>
+            <p className="text-[9px] font-['Press_Start_2P'] text-gray-500 leading-relaxed">
+              {isCreator
+                ? "Choose participant voting or classic judging in the panel."
+                : "Hang tight — the host is setting up voting."}
+            </p>
+          </div>
         )}
       </div>
 
