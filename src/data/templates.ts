@@ -54,17 +54,18 @@ Structure:
     id: "dfds-seaways",
     name: "DFDS Seaways",
     description:
-      "A simplified 2008 Danish ferry company website. A logo header (no top navigation), a cream left-hand side menu, a white content area with an 'OM BORD' intro and a 2x2 grid of route cards (label bar matched to the image width), and a navy footer with a ship silhouette.",
+      "A simplified 2008 Danish ferry company website with its period look: the original DFDS Seaways logo banner (no top nav), a cream left-hand side menu, a white content area with an orange 'Om bord' breadcrumb, an 'OM BORD' intro, and a 2x2 grid of route cards (pale-blue label bar matched to the image width), and a light-blue footer with a ship silhouette.",
     logoUrl: "/templates/dfds-seaways/logo.png",
     referenceImageUrl: "/templates/dfds-seaways/reference.png",
     colors: [
       { name: "DFDS Blue", hex: "#002D83" },
-      { name: "Header Navy", hex: "#00466B" },
-      { name: "Card Blue", hex: "#2A539D" },
+      { name: "Footer Navy", hex: "#00466B" },
+      { name: "Card Label", hex: "#B8CFDE" },
       { name: "Light Blue", hex: "#B6D2E2" },
       { name: "Cream Sidebar", hex: "#EFECE2" },
       { name: "Sidebar Hover", hex: "#DAD4B5" },
       { name: "Tan Active", hex: "#DDC89D" },
+      { name: "Accent Orange", hex: "#CC8A1E" },
       { name: "Body Gray", hex: "#666666" },
     ],
     fonts: ["Verdana", "Arial"],
@@ -75,29 +76,26 @@ Structure:
       { name: "Amsterdam–Newcastle photo", url: "/templates/dfds-seaways/amsterdam-newcastle.jpg" },
     ],
     requirements: `Fonts:
-- Verdana (with Arial fallback) — small body text, the 2008 corporate look
+- Verdana (with Arial fallback), small sizes (~11px) — keep the dated 2008 look,
+  flat colours, low contrast, tight spacing (don't make it too polished).
 
-Layout (logo header, then side menu — no top navigation):
-0. Header — just the DFDS Seaways logo on white, with a navy bottom border
+Layout (logo banner, then side menu — no top navigation):
+0. Header — the original DFDS Seaways logo banner (full width), no nav/search
 1. Left sidebar (cream #EFECE2) — vertical menu: Forside, Bestil online, Rejser og
-   priser, Om bord (active, navy), with sub-items København–Oslo,
-   Esbjerg–Harwich (highlighted), Amsterdam–Newcastle, then Ruter og
-   destinationer, Sejlplan, Konference, Job.
-   Hover state: background #DAD4B5. Active item: navy #002D83 with white text.
+   priser, Om bord (active, navy #002D83), with sub-items København - Oslo,
+   Esbjerg - Harwich (highlighted), Amsterdam - Newcastle, then Ruter og
+   destinationer, Sejlplan, Konference, Job. Hover: #DAD4B5. Active sub: tan #DDC89D.
 2. Main content (white):
-   • Navy "OM BORD" crumb bar + light-blue "Velkommen om bord store og små" bar
-   • Intro paragraph + a bold italic note
-   • A 2x2 grid of route cards — each card is the image width (200px): a blue
-     label bar the SAME width as the photo, the photo, a heading, and links
-     (Kahytter, Shopping, Underholdning, Sjov for børn, Spisning)
-3. Footer — navy band with "Tlf: +45 3342 3082" and a ship silhouette
-
-Colours:
-• DFDS Blue (#002D83) — links, headings, active nav
-• Footer Navy (#00466B)
-• Card label blue (#2A539D)
-• Light Blue (#B6D2E2) — welcome bar
-• Cream (#EFECE2) — sidebar · Hover (#DAD4B5) · Active sub-item tan (#DDC89D)
+   • Orange "Om bord" breadcrumb (#CC8A1E) + pale-blue "Velkommen om bord store
+     og små" bar (#B6D2E2, muted steel-blue text)
+   • Intro paragraph + a bold italic note (#00466B)
+   • A 2x2 grid of route cards — each card is the image width (200px): a PALE
+     steel-blue label bar (#B8CFDE) with white text, the SAME width as the photo,
+     then a heading and links (Kahytter, Shopping, Underholdning, Sjov for børn,
+     Spisning). Links in blue (#2A539D), underlined.
+3. Footer — light-blue band (#B5D2E2, navy top border) with dark-navy bold
+   "Tlf: +45 3342 3082" and a ship silhouette, then a "Bliv DFDS Seaways online
+   partner" link.
 
 Provided images: the 4 route-card photos are included as assets — embed with /a/<code>.`,
     structure: [
