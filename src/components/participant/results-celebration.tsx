@@ -8,6 +8,8 @@ import type { RevealResult } from "./reveal";
 interface ResultsCelebrationProps {
   results: RevealResult[]; // sorted best-first
   myEntryId: Id<"entries"> | null; // the viewer's own entry, if they competed
+  // Rewatch a submission's playback from the standings.
+  onWatch?: (entryId: Id<"entries">, playerHandle: string) => void;
 }
 
 const PLACE = [
@@ -24,7 +26,7 @@ const ordinal = (n: number) => {
 
 // The celebratory end screen every participant sees once the host finishes the
 // game: their own placement, an animated podium, confetti, and the full board.
-export function ResultsCelebration({ results, myEntryId }: ResultsCelebrationProps) {
+export function ResultsCelebration({ results, myEntryId, onWatch }: ResultsCelebrationProps) {
   if (results.length === 0) {
     return (
       <div className="bg-[#0a0a12] border-4 border-[#3a9364] p-10 text-center"
@@ -150,9 +152,16 @@ export function ResultsCelebration({ results, myEntryId }: ResultsCelebrationPro
       {/* Full standings */}
       <div className="bg-[#0a0a12] border-4 border-[#3a9364] overflow-hidden"
         style={{ boxShadow: "6px 6px 0 0 #2d7a50" }}>
-        <h2 className="text-sm font-['Press_Start_2P'] text-[#ff6b6b] p-4 border-b-4 border-[#3a9364] bg-[#1a1a2e]">
-          {">> Final Standings"}
-        </h2>
+        <div className="flex items-center justify-between gap-3 p-4 border-b-4 border-[#3a9364] bg-[#1a1a2e]">
+          <h2 className="text-sm font-['Press_Start_2P'] text-[#ff6b6b]">
+            {">> Final Standings"}
+          </h2>
+          {onWatch && (
+            <span className="text-[8px] font-['Press_Start_2P'] text-gray-500">
+              ▶ rewatch any run
+            </span>
+          )}
+        </div>
         <table className="w-full">
           <tbody>
             {results.map((r, index) => {
@@ -188,6 +197,16 @@ export function ResultsCelebration({ results, myEntryId }: ResultsCelebrationPro
                   <td className="px-4 py-4 text-right text-sm font-['Press_Start_2P'] text-[#0df]">
                     {r.points} pts
                   </td>
+                  {onWatch && (
+                    <td className="px-4 py-4 text-right">
+                      <button
+                        onClick={() => onWatch(r.entryId, r.playerHandle)}
+                        className="px-3 py-2 font-['Press_Start_2P'] text-[8px] uppercase bg-[#1a1a2e] border-2 border-[#0df] text-[#0df] hover:bg-[#0df] hover:text-[#0a0a12] transition whitespace-nowrap"
+                      >
+                        ▶ Watch
+                      </button>
+                    </td>
+                  )}
                 </tr>
               );
             })}

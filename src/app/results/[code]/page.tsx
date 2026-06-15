@@ -249,6 +249,9 @@ export default function ResultsPage() {
               <ResultsCelebration
                 results={revealResults}
                 myEntryId={myOwnEntryId}
+                onWatch={(entryId, playerHandle) =>
+                  setPlaybackEntry({ id: entryId, playerName: playerHandle, autoPlay: true })
+                }
               />
             ) : votingPhase === "voting" ? (
               myPlayer ? (
