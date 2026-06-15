@@ -54,12 +54,12 @@ Structure:
     id: "dfds-seaways",
     name: "DFDS Seaways",
     description:
-      "A simplified 2008 Danish ferry company website with its period look: the original DFDS Seaways logo banner (no top nav), a cream left-hand side menu, a white content area with an orange 'Om bord' breadcrumb, an 'OM BORD' intro, and a 2x2 grid of route cards (pale-blue label bar matched to the image width), and a light-blue footer with a ship silhouette.",
+      "A simplified 2008 Danish ferry company website with its period look: the original DFDS Seaways logo banner (no top nav), a cream left-hand side menu, and a white content area with an orange 'Om bord' breadcrumb, an 'OM BORD' intro, and a 2x2 grid of route cards (pale-blue label bar matched to the image width, with a single caption line under each photo). No footer.",
     logoUrl: "/templates/dfds-seaways/logo.png",
     referenceImageUrl: "/templates/dfds-seaways/reference.png",
     colors: [
       { name: "DFDS Blue", hex: "#002D83" },
-      { name: "Footer Navy", hex: "#00466B" },
+      { name: "Navy", hex: "#00466B" },
       { name: "Card Label", hex: "#B8CFDE" },
       { name: "Light Blue", hex: "#B6D2E2" },
       { name: "Cream Sidebar", hex: "#EFECE2" },
@@ -91,19 +91,16 @@ Layout (logo banner, then side menu — no top navigation):
    • Intro paragraph + a bold italic note (#00466B)
    • A 2x2 grid of route cards — each card is the image width (200px): a PALE
      steel-blue label bar (#B8CFDE) with white text, the SAME width as the photo,
-     then a heading and links (Kahytter, Shopping, Underholdning, Sjov for børn,
-     Spisning). Links in blue (#2A539D), underlined.
-3. Footer — light-blue band (#B5D2E2, navy top border) with dark-navy bold
-   "Tlf: +45 3342 3082" and a ship silhouette, then a "Bliv DFDS Seaways online
-   partner" link.
+     then the photo and a single line of caption text below it (no link list).
+
+No footer.
 
 Provided images: the 4 route-card photos are included as assets — embed with /a/<code>.`,
     structure: [
       "Logo header (no top nav)",
       "Left sidebar menu (cream)",
       "Main: OM BORD intro + note",
-      "2x2 route cards (label = image width)",
-      "Footer (phone + ship)",
+      "2x2 route cards (label = image width, one caption line)",
     ],
   },
 ];
