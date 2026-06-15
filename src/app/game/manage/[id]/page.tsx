@@ -94,6 +94,26 @@ export default function GameManagePage() {
   const [editDuration, setEditDuration] = useState(15);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Big host countdown (display only — never auto-ends the session).
+  const [timeLeftMs, setTimeLeftMs] = useState<number | null>(null);
+  useEffect(() => {
+    if (game?.status !== "active" || !game?.startedAt || !game?.durationMinutes) {
+      setTimeLeftMs(null);
+      return;
+    }
+    const total = game.durationMinutes * 60 * 1000;
+    const tick = () =>
+      setTimeLeftMs(Math.max(0, total - (Date.now() - game.startedAt!)));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [game?.status, game?.startedAt, game?.durationMinutes]);
+
+  const formatClock = (ms: number) => {
+    const s = Math.floor(ms / 1000);
+    return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+  };
+
   // Initialize edit form when game loads or edit mode is entered
   useEffect(() => {
     if (game && isEditing) {
@@ -545,6 +565,47 @@ export default function GameManagePage() {
             </p>
           </div>
         </div>
+
+        {/* Big host countdown — shown while the game is active. Display only:
+            it never ends the session; the host ends it with "End & Vote". */}
+        {game.status === "active" && timeLeftMs !== null && (
+          <div
+            className={`bg-[#0a0a12] border-4 p-8 mb-8 text-center ${
+              timeLeftMs === 0 ? "border-[#ff6b6b]" : "border-[#3a9364]"
+            }`}
+            style={{
+              boxShadow:
+                timeLeftMs === 0 ? "6px 6px 0 0 #993333" : "6px 6px 0 0 #2d7a50",
+            }}
+          >
+            <div className="text-[10px] font-['Press_Start_2P'] text-gray-400 uppercase mb-4">
+              Time remaining
+            </div>
+            <div
+              className={`font-['Press_Start_2P'] leading-none ${
+                timeLeftMs === 0
+                  ? "text-[#ff6b6b]"
+                  : timeLeftMs < 60000
+                    ? "text-yellow-400"
+                    : "text-[#4ade80]"
+              } ${timeLeftMs === 0 ? "animate-pulse" : ""}`}
+              style={{
+                fontSize: "clamp(48px, 14vw, 140px)",
+                textShadow:
+                  timeLeftMs === 0
+                    ? "4px 4px 0 #993333"
+                    : "4px 4px 0 #2d7a50",
+              }}
+            >
+              {formatClock(timeLeftMs)}
+            </div>
+            <p className="text-[10px] font-['Press_Start_2P'] text-gray-400 mt-6">
+              {timeLeftMs === 0
+                ? "Time's up — end the session when you're ready."
+                : "End the session yourself with \"End & Vote\" above."}
+            </p>
+          </div>
+        )}
 
         {/* Voting control panel (host) — appears once the game has ended */}
         {user?.id && (
