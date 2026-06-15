@@ -678,11 +678,31 @@ function CreateGameModal({ onClose }: { onClose: () => void }) {
                 <button
                   type="button"
                   onClick={() => setShowTemplates(false)}
-                  className="text-[8px] font-['Press_Start_2P'] text-gray-500 hover:text-white"
+                  disabled={isSubmitting}
+                  className="text-[8px] font-['Press_Start_2P'] text-gray-500 hover:text-white disabled:opacity-40"
                 >
                   Skip
                 </button>
               </div>
+
+              {/* Spinner while a template's images upload (can take a few seconds) */}
+              {isSubmitting && (
+                <div
+                  className="mb-4 bg-[#1a1a2e] border-2 border-purple-400 p-4 flex items-center gap-4"
+                  style={{ boxShadow: "3px 3px 0 0 #553399" }}
+                >
+                  <div className="w-8 h-8 border-4 border-purple-400 border-t-transparent rounded-full animate-spin shrink-0" />
+                  <div>
+                    <p className="text-[9px] font-['Press_Start_2P'] text-purple-300 mb-1">
+                      Setting up {selectedTemplate?.name ?? "template"}…
+                    </p>
+                    <p className="text-[8px] font-['Press_Start_2P'] text-gray-400">
+                      Uploading images — this can take a few seconds.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <div className="grid gap-4">
                 {gameTemplates.map((template) => (
                   <button
