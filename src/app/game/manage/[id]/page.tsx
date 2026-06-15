@@ -601,8 +601,8 @@ export default function GameManagePage() {
             </div>
             <p className="text-[10px] font-['Press_Start_2P'] text-gray-400 mt-6">
               {timeLeftMs === 0
-                ? "Time's up — end the session when you're ready."
-                : "End the session yourself with \"End & Vote\" above."}
+                ? "Time's up — wrapping up the session…"
+                : "Ends automatically at 00:00 — or end early with \"End & Vote\"."}
             </p>
           </div>
         )}

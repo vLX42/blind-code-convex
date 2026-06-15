@@ -86,6 +86,7 @@ export default function PlayPage() {
   const updateEntry = useMutation(api.entries.updateEntry);
   const saveSnapshot = useMutation(api.entries.saveProgressSnapshot);
   const submitEntry = useMutation(api.entries.submitEntry);
+  const autoEndGame = useMutation(api.games.autoEndGameIfTimeUp);
 
   // Get all submitted entries for the waiting slideshow
   const allEntries = useQuery(
@@ -123,12 +124,15 @@ export default function PlayPage() {
     const total = game.durationMinutes * 60 * 1000;
     const remaining = Math.max(0, total - elapsed);
 
-    // If time already expired when page loads, auto-submit this player's entry.
-    // The session itself is NOT auto-ended — the host ends it manually.
+    // If time already expired when page loads, auto-submit immediately
     if (remaining <= 0 && !isSubmitting && entry?._id) {
       handleSubmit();
+      // Trigger auto-end of game
+      if (game._id) {
+        autoEndGame({ gameId: game._id });
+      }
     }
-  }, [game?.startedAt, game?.durationMinutes, entry?._id, hasSubmitted, game?._id]);
+  }, [game?.startedAt, game?.durationMinutes, entry?._id, hasSubmitted, game?._id, autoEndGame]);
 
   // Update time remaining
   useEffect(() => {
@@ -140,15 +144,18 @@ export default function PlayPage() {
       const remaining = Math.max(0, total - elapsed);
       setTimeRemaining(remaining);
 
-      // Auto-submit this player's entry when their time is up. The session is
-      // not auto-ended here — the host ends it himself.
+      // Auto-submit when time is up
       if (remaining <= 0 && !isSubmitting) {
         handleSubmit();
+        // Trigger auto-end of game (server validates time actually expired)
+        if (game._id) {
+          autoEndGame({ gameId: game._id });
+        }
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [game?.startedAt, game?.durationMinutes, isSubmitting, hasSubmitted, game?._id]);
+  }, [game?.startedAt, game?.durationMinutes, isSubmitting, hasSubmitted, game?._id, autoEndGame]);
 
   // Redirect if game status changes
   useEffect(() => {
