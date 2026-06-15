@@ -75,27 +75,29 @@ Structure:
       { name: "Sommerliv photo", url: "/templates/dfds-seaways/sommerliv.jpg" },
       { name: "Amsterdam–Newcastle photo", url: "/templates/dfds-seaways/amsterdam-newcastle.jpg" },
     ],
-    requirements: `Fonts:
-- Verdana (with Arial fallback), small sizes (~11px) — keep the dated 2008 look,
-  flat colours, low contrast, tight spacing (don't make it too polished).
+    requirements: `FONTS
+Verdana, with Arial fallback, small sizes (~11px). Keep the dated 2008 look: flat colours, low contrast, tight spacing — don't over-polish it.
 
-Layout (logo banner, then side menu — no top navigation):
-0. Header — the original DFDS Seaways logo banner (full width), no nav/search
-1. Left sidebar (cream #EFECE2) — vertical menu: Forside, Bestil online, Rejser og
-   priser, Om bord (active, navy #002D83), with sub-items København - Oslo,
-   Esbjerg - Harwich (highlighted), Amsterdam - Newcastle, then Ruter og
-   destinationer, Sejlplan, Konference, Job. Hover: #DAD4B5. Active sub: tan #DDC89D.
-2. Main content (white):
-   • Orange "Om bord" breadcrumb (#CC8A1E) + pale-blue "Velkommen om bord store
-     og små" bar (#B6D2E2, muted steel-blue text)
-   • Intro paragraph + a bold italic note (#00466B)
-   • A 2x2 grid of route cards — each card is the image width (200px): a PALE
-     steel-blue label bar (#B8CFDE) with white text, the SAME width as the photo,
-     then the photo and a single line of caption text below it (no link list).
+LAYOUT
+Logo banner on top, then a side menu. No top navigation.
 
-No footer.
+Header
+- The original DFDS Seaways logo banner, full width. No nav, no search.
 
-Provided images: the 4 route-card photos are included as assets — embed with /a/<code>.`,
+Side menu (cream #EFECE2)
+- Items: Forside, Bestil online, Rejser og priser, Om bord, Ruter og destinationer, Sejlplan, Konference, Job
+- "Om bord" is active (navy #002D83) with sub-items: København–Oslo, Esbjerg–Harwich (highlighted), Amsterdam–Newcastle
+- Hover background #DAD4B5. Active sub-item tan #DDC89D.
+
+Main content (white)
+- Orange "Om bord" breadcrumb (#CC8A1E)
+- Pale-blue "Velkommen om bord store og små" bar (#B6D2E2, muted steel-blue text)
+- Intro paragraph, then a bold italic note (#00466B)
+- A 2×2 grid of route cards. Each card is the image width (200px): a pale steel-blue label bar (#B8CFDE, white text) the same width as the photo, then the photo, then one caption line. No link lists.
+- No footer.
+
+ASSETS
+The 4 route-card photos are provided — embed them with /a/<code>.`,
     structure: [
       "Logo header (no top nav)",
       "Left sidebar menu (cream)",
