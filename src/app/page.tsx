@@ -604,6 +604,23 @@ function CreateGameModal({ onClose }: { onClose: () => void }) {
         });
       }
 
+      // Upload any extra template images and add them as assets
+      if (template.images && template.images.length > 0) {
+        for (const image of template.images) {
+          try {
+            const imgBlob = await fetch(image.url).then((r) => r.blob());
+            const ext = image.url.split(".").pop() || "jpg";
+            const imgFile = new File([imgBlob], `asset.${ext}`, { type: imgBlob.type || "image/jpeg" });
+            const imgResult = await startAssetUpload([imgFile]);
+            if (imgResult?.[0]?.url) {
+              assets.push({ name: image.name, url: imgResult[0].url, type: "image" });
+            }
+          } catch (e) {
+            console.error(`Failed to upload template image ${image.name}:`, e);
+          }
+        }
+      }
+
       // Add fonts as pending assets
       if (template.fonts && template.fonts.length > 0) {
         template.fonts.forEach((fontName) => {

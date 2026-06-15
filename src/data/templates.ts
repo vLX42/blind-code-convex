@@ -9,6 +9,12 @@ export interface GameTemplate {
     hex: string;
   }>;
   fonts: string[];
+  // Extra image assets bundled with the template (besides the logo). Each is
+  // uploaded and added as a game asset players can embed via /a/<code>.
+  images?: Array<{
+    name: string;
+    url: string;
+  }>;
   requirements?: string;
   structure: string[];
 }
@@ -48,47 +54,55 @@ Structure:
     id: "dfds-seaways",
     name: "DFDS Seaways",
     description:
-      "A classic 2008 Danish ferry company website. Navy header with logo and search, a cream left-hand nav menu, a white content area with an 'OM BORD' intro and a 2x2 grid of route cards, and a navy footer with a ship silhouette.",
+      "A simplified 2008 Danish ferry company website. A cream left-hand side menu, a white content area with an 'OM BORD' intro and a 2x2 grid of route cards (label bar matched to the image width), and a navy footer with a ship silhouette. No top navigation.",
     logoUrl: "/templates/dfds-seaways/logo.png",
     referenceImageUrl: "/templates/dfds-seaways/reference.png",
     colors: [
       { name: "DFDS Blue", hex: "#002D83" },
       { name: "Header Navy", hex: "#00466B" },
+      { name: "Card Blue", hex: "#2A539D" },
       { name: "Light Blue", hex: "#B6D2E2" },
       { name: "Cream Sidebar", hex: "#EFECE2" },
-      { name: "Tan Highlight", hex: "#DDC89D" },
+      { name: "Sidebar Hover", hex: "#DAD4B5" },
+      { name: "Tan Active", hex: "#DDC89D" },
       { name: "Body Gray", hex: "#666666" },
-      { name: "White", hex: "#FFFFFF" },
     ],
     fonts: ["Verdana", "Arial"],
+    images: [
+      { name: "København–Oslo photo", url: "/templates/dfds-seaways/kobenhavn-oslo.jpg" },
+      { name: "Esbjerg–Harwich photo", url: "/templates/dfds-seaways/esbjerg-harwich.jpg" },
+      { name: "Sommerliv photo", url: "/templates/dfds-seaways/sommerliv.jpg" },
+      { name: "Amsterdam–Newcastle photo", url: "/templates/dfds-seaways/amsterdam-newcastle.jpg" },
+    ],
     requirements: `Fonts:
 - Verdana (with Arial fallback) — small body text, the 2008 corporate look
 
-Layout (fixed width, centred on a light-blue page):
-1. Header — navy band with the DFDS Seaways logo (left) and a search box (right)
-2. Secondary nav bar (light blue) with top links
-3. Left sidebar (cream) — vertical menu: Forside, Bestil online, Rejser og priser,
-   Om bord (active, with sub-items), Ruter og destinationer, Sejlplan, Konference, Job
-4. Main content (white):
-   • Blue bar heading "OM BORD" + "Velkommen om bord store og små"
+Layout (no top navigation — side menu only):
+1. Left sidebar (cream #EFECE2) — vertical menu: Forside, Bestil online, Rejser og
+   priser, Om bord (active, navy), with sub-items København–Oslo,
+   Esbjerg–Harwich (highlighted), Amsterdam–Newcastle, then Ruter og
+   destinationer, Sejlplan, Konference, Job.
+   Hover state: background #DAD4B5. Active item: navy #002D83 with white text.
+2. Main content (white):
+   • Navy "OM BORD" crumb bar + light-blue "Velkommen om bord store og små" bar
    • Intro paragraph + a bold italic note
-   • A 2x2 grid of route cards, each with a light-blue label bar, a photo, a
-     heading, and links (Kahytter, Shopping, Underholdning, Sjov for børn, Spisning)
-5. Footer — navy band with "Tlf: +45 3342 3082" and a ship silhouette
+   • A 2x2 grid of route cards — each card is the image width (200px): a blue
+     label bar the SAME width as the photo, the photo, a heading, and links
+     (Kahytter, Shopping, Underholdning, Sjov for børn, Spisning)
+3. Footer — navy band with "Tlf: +45 3342 3082" and a ship silhouette
 
 Colours:
-• DFDS Blue (#002D83) — logo, links, headings
-• Header/Footer Navy (#00466B)
-• Light Blue (#B6D2E2) — card / section label bars
-• Cream (#EFECE2) — left sidebar
-• Tan (#DDC89D) — active sub-nav item
-• Body text gray (#666666)`,
+• DFDS Blue (#002D83) — links, headings, active nav
+• Footer Navy (#00466B)
+• Card label blue (#2A539D)
+• Light Blue (#B6D2E2) — welcome bar
+• Cream (#EFECE2) — sidebar · Hover (#DAD4B5) · Active sub-item tan (#DDC89D)
+
+Provided images: the 4 route-card photos are included as assets — embed with /a/<code>.`,
     structure: [
-      "Header (logo + search)",
-      "Secondary nav bar",
-      "Left sidebar menu (cream)",
-      "Main: OM BORD intro",
-      "2x2 grid of route cards",
+      "Left sidebar menu (cream, no top nav)",
+      "Main: OM BORD intro + note",
+      "2x2 route cards (label = image width)",
       "Footer (phone + ship)",
     ],
   },
