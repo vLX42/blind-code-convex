@@ -30,10 +30,23 @@ export default function GameLobbyPage() {
 
   const joinGame = useMutation(api.players.joinGame);
 
-  // Check if user already joined
-  const existingPlayer = players?.find(
-    (p) => p.userId === (user?.id as Id<"users">)
-  );
+  // This browser's stored guest player id (set when joining as a guest here).
+  const [guestPlayerId, setGuestPlayerId] = useState<Id<"players"> | null>(null);
+  useEffect(() => {
+    const stored = localStorage.getItem(`blindcode_player_${code}`);
+    if (stored) setGuestPlayerId(stored as Id<"players">);
+  }, [code]);
+
+  // Recognise the viewer's OWN player only: a logged-in user matched by their
+  // user id, or a guest matched by the player id saved in THIS browser.
+  // Never match guest players by an undefined user id — that matched every
+  // guest, so a fresh browser would "become" the first guest already in the
+  // game instead of joining as a new player.
+  const existingPlayer = user?.id
+    ? players?.find((p) => p.userId === (user.id as Id<"users">))
+    : guestPlayerId
+      ? players?.find((p) => p._id === guestPlayerId)
+      : undefined;
 
   useEffect(() => {
     if (existingPlayer) {
@@ -336,7 +349,7 @@ export default function GameLobbyPage() {
                   <div
                     key={player._id}
                     className={`bg-[#1a1a2e] px-4 py-3 flex items-center gap-3 border-2 ${
-                      player.userId === (user?.id as Id<"users">)
+                      player._id === existingPlayer?._id
                         ? "border-[#4ade80]"
                         : "border-[#3a9364]"
                     }`}
