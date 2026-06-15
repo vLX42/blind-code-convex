@@ -24,12 +24,13 @@ interface PresentationProps {
 export function Presentation({
   entries,
   gameId,
-  targetDuration = 15,
+  targetDuration = 8,
 }: PresentationProps) {
   const [index, setIndex] = useState(0);
   const [showCode, setShowCode] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
   const [snapIndex, setSnapIndex] = useState(0);
+  const [finished, setFinished] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const current = entries[index];
@@ -56,21 +57,30 @@ export function Presentation({
   }, [assets]);
 
   const intervalMs = useMemo(() => {
-    if (sortedSnapshots.length <= 1) return 1000;
-    return (targetDuration * 1000) / sortedSnapshots.length;
+    if (sortedSnapshots.length <= 1) return 500;
+    // Play through quickly, but never crawl when there are few snapshots.
+    return Math.min(650, (targetDuration * 1000) / sortedSnapshots.length);
   }, [sortedSnapshots.length, targetDuration]);
 
   // Reset animation whenever we switch submissions.
   useEffect(() => {
     setSnapIndex(0);
+    setFinished(false);
     setIsPlaying(true);
   }, [index]);
 
-  // Drive the code-progression animation (loops).
+  // Drive the code-progression animation once (no loop); stop on the last frame.
   useEffect(() => {
     if (!isPlaying || sortedSnapshots.length === 0) return;
     intervalRef.current = setInterval(() => {
-      setSnapIndex((prev) => (prev + 1) % sortedSnapshots.length);
+      setSnapIndex((prev) => {
+        if (prev >= sortedSnapshots.length - 1) {
+          setIsPlaying(false);
+          setFinished(true);
+          return sortedSnapshots.length - 1;
+        }
+        return prev + 1;
+      });
     }, intervalMs);
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
@@ -88,11 +98,15 @@ export function Presentation({
     );
   }
 
+  const snapshotsReady = snapshots !== undefined;
   const hasSnapshots = sortedSnapshots.length > 0;
-  const currentHtml = hasSnapshots
-    ? sortedSnapshots[snapIndex]?.html || ""
-    : current.finalHtml;
-  const displayHtml = isPlaying && hasSnapshots ? currentHtml : current.finalHtml;
+  // Only reveal the final submission once playback finishes (or when there are
+  // no snapshots to animate). While playing/loading, show the current frame —
+  // never flash the final up front.
+  const displayHtml =
+    finished || (snapshotsReady && !hasSnapshots)
+      ? current.finalHtml
+      : sortedSnapshots[snapIndex]?.html ?? "";
 
   const renderPreview = (html: string) => {
     const doc = `<!DOCTYPE html><html><head>${googleFontLinks}<style>body{margin:0;padding:0;background:white;}</style></head><body>${html}</body></html>`;
@@ -109,7 +123,9 @@ export function Presentation({
 
   const progress = hasSnapshots
     ? ((snapIndex + 1) / sortedSnapshots.length) * 100
-    : 100;
+    : finished
+      ? 100
+      : 0;
 
   return (
     <div className="bg-[#0a0a12] border-4 border-[#3a9364] overflow-hidden"
@@ -126,11 +142,21 @@ export function Presentation({
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setIsPlaying((p) => !p)}
+            onClick={() => {
+              if (isPlaying) {
+                setIsPlaying(false);
+                return;
+              }
+              if (finished) {
+                setSnapIndex(0);
+                setFinished(false);
+              }
+              setIsPlaying(true);
+            }}
             disabled={!hasSnapshots}
             className="px-3 py-2 font-['Press_Start_2P'] text-[8px] uppercase bg-[#0df] text-[#0a0a12] hover:bg-white transition disabled:opacity-40"
           >
-            {isPlaying ? "Pause" : "Replay"}
+            {isPlaying ? "Pause" : finished ? "Replay" : "Play"}
           </button>
           <button
             onClick={() => setShowCode((s) => !s)}

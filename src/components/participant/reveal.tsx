@@ -49,10 +49,11 @@ export function ParticipantReveal({
     return { medal: "🥉", label: "3rd Place", color: "#cd7f32", glow: "rgba(205,127,50,0.5)" };
   };
 
-  const enterFor = (step: number) => {
-    if (step === 0) return { x: -320, opacity: 0 }; // 3rd from the left
-    if (step === 1) return { x: 320, opacity: 0 }; // 2nd from the right
-    return { scale: 0.2, opacity: 0, y: -40 }; // 1st pops in
+  // Entrance per place (each card slides/pops in from a different direction).
+  const enterFor = (rankIndex: number) => {
+    if (rankIndex === 0) return { scale: 0.2, opacity: 0, y: -40 }; // 1st pops in
+    if (rankIndex === 1) return { x: 320, opacity: 0 }; // 2nd from the right
+    return { x: -320, opacity: 0 }; // 3rd from the left
   };
 
   if (podium.length === 0) {
@@ -110,7 +111,12 @@ export function ParticipantReveal({
 
       <div className="w-full max-w-2xl space-y-5">
         <AnimatePresence>
-          {revealOrder.slice(0, shown).map((rankIndex, step) => {
+          {/* Most-recently-revealed on top: revealing a new place pushes the
+              others down, so the winner (revealed last) ends up at the top. */}
+          {revealOrder
+            .slice(0, shown)
+            .reverse()
+            .map((rankIndex) => {
             const result = podium[rankIndex];
             if (!result) return null;
             const meta = placeMeta(rankIndex);
@@ -118,32 +124,39 @@ export function ParticipantReveal({
             return (
               <motion.div
                 key={result.entryId}
-                initial={enterFor(step)}
+                layout
+                initial={enterFor(rankIndex)}
                 animate={{ x: 0, y: 0, scale: 1, opacity: 1 }}
                 transition={{ type: "spring", stiffness: 130, damping: 14 }}
-                className="bg-[#0a0a12] border-4 p-6 flex items-center justify-between gap-4 relative"
+                className={`bg-[#0a0a12] border-4 flex items-center justify-between gap-4 relative ${
+                  isWinner ? "p-8 md:p-10" : "p-5 md:p-6"
+                }`}
                 style={{
                   borderColor: meta.color,
-                  boxShadow: `8px 8px 0 0 ${meta.color}55, 0 0 ${isWinner ? 60 : 30}px ${meta.glow}`,
+                  boxShadow: `8px 8px 0 0 ${meta.color}55, 0 0 ${isWinner ? 70 : 28}px ${meta.glow}`,
                 }}
               >
                 <div className="flex items-center gap-4">
                   <motion.span
-                    className="text-4xl md:text-6xl"
-                    animate={isWinner ? { scale: [1, 1.25, 1] } : {}}
+                    className={isWinner ? "text-6xl md:text-8xl" : "text-4xl md:text-5xl"}
+                    animate={isWinner ? { scale: [1, 1.18, 1] } : {}}
                     transition={{ duration: 0.8, repeat: isWinner ? Infinity : 0 }}
                   >
                     {meta.medal}
                   </motion.span>
                   <div>
                     <div
-                      className="text-[8px] font-['Press_Start_2P'] uppercase mb-2"
+                      className={`font-['Press_Start_2P'] uppercase mb-2 ${
+                        isWinner ? "text-[11px] md:text-sm" : "text-[8px]"
+                      }`}
                       style={{ color: meta.color }}
                     >
                       {meta.label}
                     </div>
                     <div
-                      className="text-lg md:text-3xl font-['Press_Start_2P'] text-[#4ade80]"
+                      className={`font-['Press_Start_2P'] text-[#4ade80] ${
+                        isWinner ? "text-2xl md:text-5xl" : "text-base md:text-2xl"
+                      }`}
                       style={{ textShadow: "2px 2px 0 #2d7a50" }}
                     >
                       {result.playerHandle}
@@ -151,7 +164,11 @@ export function ParticipantReveal({
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-xl md:text-4xl font-['Press_Start_2P'] text-[#0df]">
+                  <div
+                    className={`font-['Press_Start_2P'] text-[#0df] ${
+                      isWinner ? "text-3xl md:text-6xl" : "text-lg md:text-3xl"
+                    }`}
+                  >
                     {result.points}
                   </div>
                   <div className="text-[7px] font-['Press_Start_2P'] text-gray-500 mt-1">

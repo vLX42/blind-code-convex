@@ -14,7 +14,7 @@ interface PlaybackProps {
   gameId?: Id<"games">; // Optional game ID to load assets for font support
 }
 
-export function Playback({ entryId, playerName, onClose, autoPlay = false, targetDuration = 15, gameId }: PlaybackProps) {
+export function Playback({ entryId, playerName, onClose, autoPlay = false, targetDuration = 8, gameId }: PlaybackProps) {
   const snapshots = useQuery(api.entries.getProgressSnapshots, { entryId });
   const assets = useQuery(api.assets.getGameAssets, gameId ? { gameId } : "skip");
 

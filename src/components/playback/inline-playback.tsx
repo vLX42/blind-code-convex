@@ -12,7 +12,7 @@ interface InlinePlaybackProps {
   gameId?: Id<"games">; // Optional game ID to load assets for font support
 }
 
-export function InlinePlayback({ entryId, finalHtml, targetDuration = 15, gameId }: InlinePlaybackProps) {
+export function InlinePlayback({ entryId, finalHtml, targetDuration = 8, gameId }: InlinePlaybackProps) {
   const snapshots = useQuery(api.entries.getProgressSnapshots, { entryId });
   const assets = useQuery(api.assets.getGameAssets, gameId ? { gameId } : "skip");
 

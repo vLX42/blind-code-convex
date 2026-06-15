@@ -1251,7 +1251,7 @@ export default function GameManagePage() {
           playerName={playbackEntry.playerName}
           onClose={() => setPlaybackEntry(null)}
           autoPlay={playbackEntry.autoPlay}
-          targetDuration={15}
+          targetDuration={8}
           gameId={gameId}
         />
       )}

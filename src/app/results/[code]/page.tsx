@@ -300,7 +300,7 @@ export default function ResultsPage() {
               <Presentation
                 entries={anonEntries}
                 gameId={game._id}
-                targetDuration={15}
+                targetDuration={8}
               />
             )}
           </div>
@@ -385,7 +385,7 @@ export default function ResultsPage() {
                     <InlinePlayback
                       entryId={entry._id}
                       finalHtml={entry.html || ""}
-                      targetDuration={15}
+                      targetDuration={8}
                       gameId={game?._id}
                     />
                     <div className="mt-4 flex items-center gap-4">
@@ -709,7 +709,7 @@ export default function ResultsPage() {
           playerName={playbackEntry.playerName}
           onClose={() => setPlaybackEntry(null)}
           autoPlay={playbackEntry.autoPlay}
-          targetDuration={15}
+          targetDuration={8}
           gameId={game?._id}
         />
       )}
