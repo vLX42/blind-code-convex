@@ -6,6 +6,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../../components/providers";
 import { Id } from "../../../../convex/_generated/dataModel";
+import { AssetRef } from "@/components/asset-ref";
 import Link from "next/link";
 
 export default function GameLobbyPage() {
@@ -310,9 +311,11 @@ export default function GameLobbyPage() {
                           Auto-loaded
                         </span>
                       ) : (
-                        <code className="text-[10px] font-['Press_Start_2P'] text-[#4ade80]">
-                          /a/{asset.shortCode}
-                        </code>
+                        <AssetRef
+                          shortCode={asset.shortCode}
+                          url={asset.url}
+                          type={asset.type}
+                        />
                       )}
                     </div>
                   ))}

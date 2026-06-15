@@ -9,6 +9,7 @@ import { Id } from "../../../../convex/_generated/dataModel";
 import { Streak } from "@/components/streak/streak";
 import { Modal } from "@/components/modal";
 import { Button } from "@/components/button";
+import { AssetRef } from "@/components/asset-ref";
 import useInterval from "@/hooks/useInterval";
 import dynamic from "next/dynamic";
 import type { EditorProps } from "@/components/editor";
@@ -482,7 +483,11 @@ export default function PlayPage() {
                       </>
                     ) : (
                       <>
-                        <code className="text-[#4ade80] font-bold">/a/{asset.shortCode}</code>
+                        <AssetRef
+                          shortCode={asset.shortCode}
+                          url={asset.url}
+                          type={asset.type}
+                        />
                         <span className="text-[#ff6b6b]">&gt;</span>
                         <span className="text-[#ffffff]">{asset.name}</span>
                         <span className="text-[#666] uppercase">({asset.type})</span>

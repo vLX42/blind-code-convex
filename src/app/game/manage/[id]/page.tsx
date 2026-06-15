@@ -12,6 +12,7 @@ import { ImageUpload } from "@/components/upload";
 import { Playback } from "@/components/playback";
 import { GoogleFontSelector } from "@/components/google-font-selector";
 import { HostVotingPanel } from "@/components/participant/host-voting-panel";
+import { AssetRef } from "@/components/asset-ref";
 
 export default function GameManagePage() {
   const params = useParams();
@@ -1044,9 +1045,11 @@ export default function GameManagePage() {
                         Auto-loaded (use: font-family: '{asset.name}')
                       </span>
                     ) : (
-                      <code className="text-[10px] text-[#0df] bg-[#0a0a12] px-2 py-1 border border-[#0df]">
-                        /a/{asset.shortCode}
-                      </code>
+                      <AssetRef
+                        shortCode={asset.shortCode}
+                        url={asset.url}
+                        type={asset.type}
+                      />
                     )}
                     <span className="text-[10px] text-gray-500">
                       {asset.type}
