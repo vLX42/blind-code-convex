@@ -12,7 +12,9 @@ import { Id } from "../../../../convex/_generated/dataModel";
 //   players  2..50   how many simulated clients (default 10)
 //   advance  voting | reveal | finished   how far to take it (default reveal)
 //
-// If SIMULATE_SECRET is set in the environment, ?key= must match it.
+// In production this endpoint is LOCKED by default: SIMULATE_SECRET must be set
+// and ?key= must match it. In development it's open (or gated by the secret if
+// one is configured).
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -50,9 +52,22 @@ async function run(req: NextRequest) {
     );
   }
 
-  // Optional shared-secret guard.
+  // Secret guard. In production the endpoint is locked by default: it only runs
+  // if SIMULATE_SECRET is configured AND ?key= matches it. In development it's
+  // open unless a secret is set (then ?key= must match).
   const secret = process.env.SIMULATE_SECRET;
-  if (secret && url.searchParams.get("key") !== secret) {
+  const key = url.searchParams.get("key");
+  const isProd = process.env.NODE_ENV === "production";
+  if (isProd && !secret) {
+    return NextResponse.json(
+      {
+        error:
+          "This endpoint is disabled in production. Set SIMULATE_SECRET and call with ?key=<secret>.",
+      },
+      { status: 403 }
+    );
+  }
+  if (secret && key !== secret) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
