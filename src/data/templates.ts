@@ -54,7 +54,7 @@ Structure:
     id: "dfds-seaways",
     name: "DFDS Seaways",
     description:
-      "A simplified 2008 Danish ferry company website. A cream left-hand side menu, a white content area with an 'OM BORD' intro and a 2x2 grid of route cards (label bar matched to the image width), and a navy footer with a ship silhouette. No top navigation.",
+      "A simplified 2008 Danish ferry company website. A logo header (no top navigation), a cream left-hand side menu, a white content area with an 'OM BORD' intro and a 2x2 grid of route cards (label bar matched to the image width), and a navy footer with a ship silhouette.",
     logoUrl: "/templates/dfds-seaways/logo.png",
     referenceImageUrl: "/templates/dfds-seaways/reference.png",
     colors: [
@@ -77,7 +77,8 @@ Structure:
     requirements: `Fonts:
 - Verdana (with Arial fallback) — small body text, the 2008 corporate look
 
-Layout (no top navigation — side menu only):
+Layout (logo header, then side menu — no top navigation):
+0. Header — just the DFDS Seaways logo on white, with a navy bottom border
 1. Left sidebar (cream #EFECE2) — vertical menu: Forside, Bestil online, Rejser og
    priser, Om bord (active, navy), with sub-items København–Oslo,
    Esbjerg–Harwich (highlighted), Amsterdam–Newcastle, then Ruter og
@@ -100,7 +101,8 @@ Colours:
 
 Provided images: the 4 route-card photos are included as assets — embed with /a/<code>.`,
     structure: [
-      "Left sidebar menu (cream, no top nav)",
+      "Logo header (no top nav)",
+      "Left sidebar menu (cream)",
       "Main: OM BORD intro + note",
       "2x2 route cards (label = image width)",
       "Footer (phone + ship)",
