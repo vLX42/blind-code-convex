@@ -31,6 +31,22 @@ export default defineSchema({
       v.literal("voting"),
       v.literal("finished")
     ),
+    // Which voting system to use once the game reaches the "voting" status.
+    // "classic" = judge tokens + 1-10 scoring (original). "participant" = blind
+    // peer voting where every player gets ranked 1st/2nd votes. Absent = classic.
+    votingMode: v.optional(
+      v.union(v.literal("classic"), v.literal("participant"))
+    ),
+    // Host-driven sub-phase for participant voting:
+    // "presentation" (host walks through submissions) -> "voting" (votes open)
+    // -> "reveal" (votes closed, host reveals 3rd-to-1st).
+    votingPhase: v.optional(
+      v.union(
+        v.literal("presentation"),
+        v.literal("voting"),
+        v.literal("reveal")
+      )
+    ),
     startedAt: v.optional(v.number()), // Timestamp when game started
     endedAt: v.optional(v.number()), // Timestamp when game ended
   })
@@ -95,6 +111,19 @@ export default defineSchema({
     .index("by_game", ["gameId"])
     .index("by_entry", ["entryId"])
     .index("by_judge_and_game", ["judgeId", "gameId"]),
+
+  // Ranked peer votes for "participant" voting mode.
+  // Each voter (a player) may cast up to two votes: rank 1 (first choice, 2 pts)
+  // and rank 2 (second choice, 1 pt). A voter has at most one row per rank.
+  participantVotes: defineTable({
+    gameId: v.id("games"),
+    voterPlayerId: v.id("players"), // the player casting the vote
+    entryId: v.id("entries"), // the submission voted for
+    rank: v.number(), // 1 = first choice (2 pts), 2 = second choice (1 pt)
+  })
+    .index("by_game", ["gameId"])
+    .index("by_entry", ["entryId"])
+    .index("by_voter_and_game", ["voterPlayerId", "gameId"]),
 
   // Vote tokens for guest judges
   voteTokens: defineTable({

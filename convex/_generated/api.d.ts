@@ -12,6 +12,7 @@ import type * as assets from "../assets.js";
 import type * as auth from "../auth.js";
 import type * as entries from "../entries.js";
 import type * as games from "../games.js";
+import type * as participantVotes from "../participantVotes.js";
 import type * as players from "../players.js";
 import type * as voteTokens from "../voteTokens.js";
 import type * as votes from "../votes.js";
@@ -27,6 +28,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   entries: typeof entries;
   games: typeof games;
+  participantVotes: typeof participantVotes;
   players: typeof players;
   voteTokens: typeof voteTokens;
   votes: typeof votes;

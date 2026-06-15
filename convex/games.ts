@@ -204,6 +204,56 @@ export const autoEndGameIfTimeUp = mutation({
   },
 });
 
+// Choose which voting system to use (host only). Switching to participant mode
+// starts at the "presentation" phase; switching to classic clears the phase.
+export const setVotingMode = mutation({
+  args: {
+    gameId: v.id("games"),
+    creatorId: v.id("users"),
+    mode: v.union(v.literal("classic"), v.literal("participant")),
+  },
+  handler: async (ctx, args) => {
+    const game = await ctx.db.get(args.gameId);
+    if (!game) {
+      throw new Error("Game not found");
+    }
+    if (game.creatorId !== args.creatorId) {
+      throw new Error("Only the creator can change the voting mode");
+    }
+    await ctx.db.patch(args.gameId, {
+      votingMode: args.mode,
+      votingPhase: args.mode === "participant" ? "presentation" : undefined,
+    });
+  },
+});
+
+// Advance/set the participant-voting sub-phase (host only):
+// presentation -> voting -> reveal.
+export const setVotingPhase = mutation({
+  args: {
+    gameId: v.id("games"),
+    creatorId: v.id("users"),
+    phase: v.union(
+      v.literal("presentation"),
+      v.literal("voting"),
+      v.literal("reveal")
+    ),
+  },
+  handler: async (ctx, args) => {
+    const game = await ctx.db.get(args.gameId);
+    if (!game) {
+      throw new Error("Game not found");
+    }
+    if (game.creatorId !== args.creatorId) {
+      throw new Error("Only the creator can control voting");
+    }
+    await ctx.db.patch(args.gameId, {
+      votingMode: "participant",
+      votingPhase: args.phase,
+    });
+  },
+});
+
 // Finish voting and mark game as finished
 export const finishGame = mutation({
   args: {
@@ -288,6 +338,15 @@ export const resetGame = mutation({
       await ctx.db.delete(vote._id);
     }
 
+    // Delete all participant (peer) votes
+    const participantVotes = await ctx.db
+      .query("participantVotes")
+      .withIndex("by_game", (q) => q.eq("gameId", args.gameId))
+      .collect();
+    for (const vote of participantVotes) {
+      await ctx.db.delete(vote._id);
+    }
+
     // Delete all entries and their progress snapshots
     const entries = await ctx.db
       .query("entries")
@@ -327,6 +386,7 @@ export const resetGame = mutation({
       status: "lobby",
       startedAt: undefined,
       endedAt: undefined,
+      votingPhase: undefined,
     });
 
     return { success: true };
@@ -390,6 +450,15 @@ export const deleteGame = mutation({
       .withIndex("by_game", (q) => q.eq("gameId", args.gameId))
       .collect();
     for (const vote of votes) {
+      await ctx.db.delete(vote._id);
+    }
+
+    // Delete all participant (peer) votes
+    const participantVotes = await ctx.db
+      .query("participantVotes")
+      .withIndex("by_game", (q) => q.eq("gameId", args.gameId))
+      .collect();
+    for (const vote of participantVotes) {
       await ctx.db.delete(vote._id);
     }
 

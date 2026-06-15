@@ -10,6 +10,9 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Playback } from "@/components/playback";
 import { InlinePlayback } from "@/components/playback/inline-playback";
+import { Presentation, type AnonymousEntry } from "@/components/participant/presentation";
+import { ParticipantVoting } from "@/components/participant/voting";
+import { ParticipantReveal, type RevealResult } from "@/components/participant/reveal";
 
 type ViewMode = "submissions" | "voting" | "leaderboard" | "reveal";
 
@@ -53,6 +56,85 @@ export default function ResultsPage() {
   const selectWinner = useMutation(api.votes.selectWinner);
 
   const isCreator = user?.id === game?.creatorId;
+
+  // ----- Participant (peer) voting -----
+  const votingMode = game?.votingMode ?? "classic";
+  const votingPhase = game?.votingPhase;
+
+  const setVotingMode = useMutation(api.games.setVotingMode);
+  const setVotingPhase = useMutation(api.games.setVotingPhase);
+  const finishGame = useMutation(api.games.finishGame);
+  const joinAsVoter = useMutation(api.players.joinAsVoter);
+
+  // Resolve the current viewer's player identity (for casting peer votes).
+  const [guestPlayerId, setGuestPlayerId] = useState<Id<"players"> | null>(null);
+  useEffect(() => {
+    const stored = localStorage.getItem(`blindcode_player_${code}`);
+    if (stored) setGuestPlayerId(stored as Id<"players">);
+  }, [code]);
+
+  const playerByUser = useQuery(
+    api.players.getPlayerByUserAndGame,
+    game?._id && user?.id
+      ? { userId: user.id as Id<"users">, gameId: game._id }
+      : "skip"
+  );
+  const playerById = useQuery(
+    api.players.getPlayerById,
+    guestPlayerId && !user?.id ? { playerId: guestPlayerId } : "skip"
+  );
+  const myPlayer = playerByUser || playerById;
+
+  const voteStatus = useQuery(
+    api.participantVotes.getParticipantVoteStatus,
+    game?._id && votingMode === "participant" ? { gameId: game._id } : "skip"
+  );
+  const participantResults = useQuery(
+    api.participantVotes.getParticipantResults,
+    game?._id && votingMode === "participant" ? { gameId: game._id } : "skip"
+  );
+
+  // Anonymized, stable-ordered list of submitted entries ("Submission N").
+  const anonEntries: AnonymousEntry[] = (entries ?? [])
+    .filter((e) => e.isSubmitted)
+    .sort((a, b) => a._creationTime - b._creationTime)
+    .map((e, i) => ({
+      entryId: e._id,
+      label: `Submission ${i + 1}`,
+      finalHtml: e.html || "",
+    }));
+
+  const revealResults: RevealResult[] = (participantResults ?? []).map((r) => ({
+    entryId: r.entry._id,
+    playerHandle: r.player?.handle || "Unknown",
+    points: r.points,
+    firstPlaceVotes: r.firstPlaceVotes,
+    secondPlaceVotes: r.secondPlaceVotes,
+  }));
+
+  const myOwnEntryId =
+    (entries ?? []).find((e) => e.playerId === myPlayer?._id)?._id ?? null;
+
+  const handleSetMode = async (mode: "classic" | "participant") => {
+    if (!game?._id || !user?.id) return;
+    await setVotingMode({ gameId: game._id, creatorId: user.id as Id<"users">, mode });
+  };
+  const handleSetPhase = async (phase: "presentation" | "voting" | "reveal") => {
+    if (!game?._id || !user?.id) return;
+    await setVotingPhase({ gameId: game._id, creatorId: user.id as Id<"users">, phase });
+  };
+  const handleJoinAsVoter = async () => {
+    if (!game?._id || !user?.id) return;
+    await joinAsVoter({
+      gameId: game._id,
+      userId: user.id as Id<"users">,
+      handle: user.username || "Host",
+    });
+  };
+  const handleFinishGame = async () => {
+    if (!game?._id || !user?.id) return;
+    await finishGame({ gameId: game._id, creatorId: user.id as Id<"users"> });
+  };
 
   // Reset view mode if user loses voting permission or logs out
   useEffect(() => {
@@ -157,6 +239,198 @@ export default function ResultsPage() {
       </header>
 
       <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Host voting controls */}
+        {isCreator && (
+          <div
+            className="bg-[#0a0a12] border-4 border-purple-600 p-4 mb-8"
+            style={{ boxShadow: "6px 6px 0 0 #553399" }}
+          >
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <span className="text-[8px] font-['Press_Start_2P'] text-purple-300 uppercase">
+                  Voting mode
+                </span>
+                <button
+                  onClick={() => handleSetMode("classic")}
+                  className={`px-3 py-2 font-['Press_Start_2P'] text-[8px] uppercase transition ${
+                    votingMode === "classic"
+                      ? "bg-purple-600 text-white"
+                      : "bg-[#1a1a2e] border-2 border-purple-600 text-purple-300 hover:bg-[#2a2a4e]"
+                  }`}
+                >
+                  Classic
+                </button>
+                <button
+                  onClick={() => handleSetMode("participant")}
+                  className={`px-3 py-2 font-['Press_Start_2P'] text-[8px] uppercase transition ${
+                    votingMode === "participant"
+                      ? "bg-purple-600 text-white"
+                      : "bg-[#1a1a2e] border-2 border-purple-600 text-purple-300 hover:bg-[#2a2a4e]"
+                  }`}
+                >
+                  Participant
+                </button>
+              </div>
+
+              {votingMode === "participant" && game.status === "voting" && (
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="text-[10px] font-['Press_Start_2P'] text-[#4ade80]">
+                    Voted: {voteStatus?.votedCount ?? 0}/{voteStatus?.eligibleCount ?? 0}
+                  </span>
+                  {votingPhase === "presentation" && (
+                    <button
+                      onClick={() => handleSetPhase("voting")}
+                      className="px-4 py-2 font-['Press_Start_2P'] text-[8px] uppercase bg-[#3a9364] hover:bg-[#4ade80] hover:text-[#0a0a12] transition"
+                      style={{ boxShadow: "3px 3px 0 0 #2d7a50" }}
+                    >
+                      Open Voting
+                    </button>
+                  )}
+                  {votingPhase === "voting" && (
+                    <>
+                      <button
+                        onClick={() => handleSetPhase("presentation")}
+                        className="px-3 py-2 font-['Press_Start_2P'] text-[8px] uppercase bg-[#1a1a2e] border-2 border-[#3a9364] text-[#4ade80] hover:bg-[#2a2a4e] transition"
+                      >
+                        {"<- Present"}
+                      </button>
+                      <button
+                        onClick={() => handleSetPhase("reveal")}
+                        className="px-4 py-2 font-['Press_Start_2P'] text-[8px] uppercase bg-gradient-to-r from-[#ff6b6b] to-[#0df] text-[#0a0a12] hover:from-[#ff8888] hover:to-[#66ffff] transition"
+                        style={{ boxShadow: "3px 3px 0 0 #993333" }}
+                      >
+                        Close & Reveal
+                      </button>
+                    </>
+                  )}
+                  {votingPhase === "reveal" && (
+                    <>
+                      <button
+                        onClick={() => handleSetPhase("voting")}
+                        className="px-3 py-2 font-['Press_Start_2P'] text-[8px] uppercase bg-[#1a1a2e] border-2 border-[#3a9364] text-[#4ade80] hover:bg-[#2a2a4e] transition"
+                      >
+                        Re-open Voting
+                      </button>
+                      <button
+                        onClick={handleFinishGame}
+                        className="px-4 py-2 font-['Press_Start_2P'] text-[8px] uppercase bg-yellow-600 hover:bg-yellow-500 text-[#0a0a12] transition"
+                        style={{ boxShadow: "3px 3px 0 0 #997700" }}
+                      >
+                        Finish Game
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ===== Participant (peer) voting ===== */}
+        {votingMode === "participant" ? (
+          <div>
+            {game.status === "finished" ? (
+              <div
+                className="bg-[#0a0a12] border-4 border-[#3a9364] overflow-hidden"
+                style={{ boxShadow: "6px 6px 0 0 #2d7a50" }}
+              >
+                <h2 className="text-sm font-['Press_Start_2P'] text-[#ff6b6b] p-4 border-b-4 border-[#3a9364] bg-[#1a1a2e]">
+                  {">> Final Standings"}
+                </h2>
+                {revealResults.length > 0 ? (
+                  <table className="w-full">
+                    <tbody>
+                      {revealResults.map((r, index) => (
+                        <tr key={r.entryId} className="border-b-2 border-[#1a1a2e]">
+                          <td className="px-4 py-4 w-12">
+                            {index === 0 && <span className="text-xl">🥇</span>}
+                            {index === 1 && <span className="text-xl">🥈</span>}
+                            {index === 2 && <span className="text-xl">🥉</span>}
+                            {index > 2 && (
+                              <span className="text-[10px] font-['Press_Start_2P'] text-gray-500">
+                                {index + 1}
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-4 py-4 text-xs font-['Press_Start_2P'] text-[#4ade80]">
+                            {r.playerHandle}
+                          </td>
+                          <td className="px-4 py-4 text-right text-[8px] font-['Press_Start_2P'] text-gray-500">
+                            🥇{r.firstPlaceVotes} 🥈{r.secondPlaceVotes}
+                          </td>
+                          <td className="px-4 py-4 text-right text-sm font-['Press_Start_2P'] text-[#0df]">
+                            {r.points} pts
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p className="p-8 text-center text-[10px] font-['Press_Start_2P'] text-gray-500">
+                    No votes were cast.
+                  </p>
+                )}
+              </div>
+            ) : votingPhase === "voting" ? (
+              myPlayer ? (
+                <ParticipantVoting
+                  gameId={game._id}
+                  voterPlayerId={myPlayer._id}
+                  ownEntryId={myOwnEntryId}
+                  entries={anonEntries}
+                />
+              ) : isCreator ? (
+                <div
+                  className="bg-[#0a0a12] border-4 border-purple-600 p-8 text-center"
+                  style={{ boxShadow: "6px 6px 0 0 #553399" }}
+                >
+                  <p className="text-[10px] font-['Press_Start_2P'] text-gray-300 mb-6">
+                    You&apos;re hosting without a submission. Join the vote to cast
+                    your 2 votes.
+                  </p>
+                  <button
+                    onClick={handleJoinAsVoter}
+                    className="px-6 py-3 font-['Press_Start_2P'] text-[10px] uppercase bg-purple-600 hover:bg-purple-500 transition"
+                    style={{ boxShadow: "4px 4px 0 0 #553399" }}
+                  >
+                    Join Voting
+                  </button>
+                </div>
+              ) : (
+                <div
+                  className="bg-[#0a0a12] border-4 border-[#3a9364] p-8 text-center"
+                  style={{ boxShadow: "6px 6px 0 0 #2d7a50" }}
+                >
+                  <p className="text-[10px] font-['Press_Start_2P'] text-gray-400">
+                    Voting is in progress. Only players in this game can vote.
+                  </p>
+                </div>
+              )
+            ) : votingPhase === "reveal" ? (
+              isCreator ? (
+                <ParticipantReveal results={revealResults} />
+              ) : (
+                <div className="min-h-[50vh] flex items-center justify-center">
+                  <p className="text-[12px] font-['Press_Start_2P'] text-[#4ade80] text-center animate-pulse">
+                    Winner reveal in progress
+                    <br />
+                    <span className="text-[10px] text-gray-400">
+                      watch the main screen! 🏆
+                    </span>
+                  </p>
+                </div>
+              )
+            ) : (
+              // presentation (default)
+              <Presentation
+                entries={anonEntries}
+                gameId={game._id}
+                targetDuration={15}
+              />
+            )}
+          </div>
+        ) : (
+        <>
         {/* View Mode Tabs */}
         <div className="flex flex-wrap gap-3 mb-8">
           <button
@@ -532,6 +806,8 @@ export default function ResultsPage() {
               </pre>
             </div>
           </div>
+        )}
+        </>
         )}
       </div>
 

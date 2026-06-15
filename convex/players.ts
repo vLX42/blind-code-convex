@@ -51,6 +51,47 @@ export const joinGame = mutation({
   },
 });
 
+// Join purely as a voter (no submission entry). Used by the host so they get
+// their participant votes even if they didn't compete. Restricted to the
+// game creator to keep voting limited to players + host.
+export const joinAsVoter = mutation({
+  args: {
+    gameId: v.id("games"),
+    userId: v.id("users"),
+    handle: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const game = await ctx.db.get(args.gameId);
+    if (!game) throw new Error("Game not found");
+    if (game.creatorId !== args.userId) {
+      throw new Error("Only the creator can join as a voter");
+    }
+
+    // Reuse an existing player row if the host already has one.
+    const existing = await ctx.db
+      .query("players")
+      .withIndex("by_user_and_game", (q) =>
+        q.eq("userId", args.userId).eq("gameId", args.gameId)
+      )
+      .first();
+    if (existing) {
+      if (!existing.isActive) {
+        await ctx.db.patch(existing._id, { isActive: true });
+      }
+      return existing._id;
+    }
+
+    // Voter-only player: deliberately no entry is created.
+    return await ctx.db.insert("players", {
+      gameId: args.gameId,
+      userId: args.userId,
+      handle: args.handle,
+      joinedAt: Date.now(),
+      isActive: true,
+    });
+  },
+});
+
 // Get all players in a game
 export const getGamePlayers = query({
   args: { gameId: v.id("games") },
