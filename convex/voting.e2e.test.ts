@@ -161,6 +161,83 @@ describe("e2e: host + 10 participants full voting flow", () => {
     });
   });
 
+  test("the synced reveal step advances and is creator-only", async () => {
+    const t = convexTest(schema, modules);
+    const hostId = await t.run(async (ctx) =>
+      ctx.db.insert("users", { githubId: "rhost", username: "rhost" })
+    );
+    const gameId = await t.mutation(api.games.createGame, {
+      creatorId: hostId,
+      title: "g",
+      description: "d",
+      referenceImageUrl: "http://x",
+      hexColors: [],
+    });
+    await t.mutation(api.games.openLobby, { gameId, creatorId: hostId });
+    await t.mutation(api.games.startGame, { gameId, creatorId: hostId });
+    for (let i = 0; i < 3; i++) {
+      const playerId = await t.mutation(api.players.joinGame, {
+        gameId,
+        handle: `P${i}`,
+      });
+      const entry = await t.query(api.entries.getPlayerEntry, { playerId });
+      await t.mutation(api.entries.submitEntry, {
+        entryId: entry!._id,
+        html: "<p>x</p>",
+        totalScore: i,
+        maxStreak: 0,
+        totalKeystrokes: 0,
+      });
+    }
+    await t.mutation(api.games.endGame, { gameId, creatorId: hostId });
+
+    // Entering the reveal phase resets the synced step to 0.
+    await t.mutation(api.games.setVotingMode, {
+      gameId,
+      creatorId: hostId,
+      mode: "participant",
+    });
+    await t.mutation(api.games.setVotingPhase, {
+      gameId,
+      creatorId: hostId,
+      phase: "reveal",
+    });
+    let game = await t.run(async (ctx) => ctx.db.get(gameId));
+    expect(game?.revealStep).toBe(0);
+
+    // Host advances the podium reveal 1 -> 2 -> 3.
+    for (const step of [1, 2, 3]) {
+      await t.mutation(api.games.setRevealStep, {
+        gameId,
+        creatorId: hostId,
+        step,
+      });
+      game = await t.run(async (ctx) => ctx.db.get(gameId));
+      expect(game?.revealStep).toBe(step);
+    }
+
+    // A non-host can't drive the reveal.
+    const stranger = await t.run(async (ctx) =>
+      ctx.db.insert("users", { githubId: "stranger-r", username: "s" })
+    );
+    await expect(
+      t.mutation(api.games.setRevealStep, {
+        gameId,
+        creatorId: stranger,
+        step: 99,
+      })
+    ).rejects.toThrow(/Only the creator/);
+
+    // Re-opening voting clears the reveal progress.
+    await t.mutation(api.games.setVotingPhase, {
+      gameId,
+      creatorId: hostId,
+      phase: "voting",
+    });
+    game = await t.run(async (ctx) => ctx.db.get(gameId));
+    expect(game?.revealStep).toBeUndefined();
+  });
+
   test("no one's vote is ever counted for their own entry", async () => {
     const t = convexTest(schema, modules);
     const hostId = await t.run(async (ctx) =>

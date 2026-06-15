@@ -13,6 +13,7 @@ import { InlinePlayback } from "@/components/playback/inline-playback";
 import { Presentation, type AnonymousEntry } from "@/components/participant/presentation";
 import { ParticipantVoting } from "@/components/participant/voting";
 import { ParticipantReveal, type RevealResult } from "@/components/participant/reveal";
+import { ResultsCelebration } from "@/components/participant/results-celebration";
 import { HostVotingPanel } from "@/components/participant/host-voting-panel";
 
 type ViewMode = "submissions" | "voting" | "leaderboard" | "reveal";
@@ -62,8 +63,10 @@ export default function ResultsPage() {
   // Undefined until the host picks a style; the HostVotingPanel prompts for it.
   const votingMode = game?.votingMode;
   const votingPhase = game?.votingPhase;
+  const revealStep = game?.revealStep ?? 0;
 
   const joinAsVoter = useMutation(api.players.joinAsVoter);
+  const setRevealStep = useMutation(api.games.setRevealStep);
 
   // Resolve the current viewer's player identity (for casting peer votes).
   const [guestPlayerId, setGuestPlayerId] = useState<Id<"players"> | null>(null);
@@ -117,6 +120,10 @@ export default function ResultsPage() {
       userId: user.id as Id<"users">,
       handle: user.username || "Host",
     });
+  };
+  const handleAdvanceReveal = (step: number) => {
+    if (!game?._id || !user?.id) return;
+    setRevealStep({ gameId: game._id, creatorId: user.id as Id<"users">, step });
   };
 
   // Reset view mode if user loses voting permission or logs out
@@ -239,47 +246,10 @@ export default function ResultsPage() {
         {votingMode === "participant" ? (
           <div>
             {game.status === "finished" ? (
-              <div
-                className="bg-[#0a0a12] border-4 border-[#3a9364] overflow-hidden"
-                style={{ boxShadow: "6px 6px 0 0 #2d7a50" }}
-              >
-                <h2 className="text-sm font-['Press_Start_2P'] text-[#ff6b6b] p-4 border-b-4 border-[#3a9364] bg-[#1a1a2e]">
-                  {">> Final Standings"}
-                </h2>
-                {revealResults.length > 0 ? (
-                  <table className="w-full">
-                    <tbody>
-                      {revealResults.map((r, index) => (
-                        <tr key={r.entryId} className="border-b-2 border-[#1a1a2e]">
-                          <td className="px-4 py-4 w-12">
-                            {index === 0 && <span className="text-xl">🥇</span>}
-                            {index === 1 && <span className="text-xl">🥈</span>}
-                            {index === 2 && <span className="text-xl">🥉</span>}
-                            {index > 2 && (
-                              <span className="text-[10px] font-['Press_Start_2P'] text-gray-500">
-                                {index + 1}
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-4 py-4 text-xs font-['Press_Start_2P'] text-[#4ade80]">
-                            {r.playerHandle}
-                          </td>
-                          <td className="px-4 py-4 text-right text-[8px] font-['Press_Start_2P'] text-gray-500">
-                            🥇{r.firstPlaceVotes} 🥈{r.secondPlaceVotes}
-                          </td>
-                          <td className="px-4 py-4 text-right text-sm font-['Press_Start_2P'] text-[#0df]">
-                            {r.points} pts
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                ) : (
-                  <p className="p-8 text-center text-[10px] font-['Press_Start_2P'] text-gray-500">
-                    No votes were cast.
-                  </p>
-                )}
-              </div>
+              <ResultsCelebration
+                results={revealResults}
+                myEntryId={myOwnEntryId}
+              />
             ) : votingPhase === "voting" ? (
               myPlayer ? (
                 <ParticipantVoting
@@ -316,19 +286,12 @@ export default function ResultsPage() {
                 </div>
               )
             ) : votingPhase === "reveal" ? (
-              isCreator ? (
-                <ParticipantReveal results={revealResults} />
-              ) : (
-                <div className="min-h-[50vh] flex items-center justify-center">
-                  <p className="text-[12px] font-['Press_Start_2P'] text-[#4ade80] text-center animate-pulse">
-                    Winner reveal in progress
-                    <br />
-                    <span className="text-[10px] text-gray-400">
-                      watch the main screen! 🏆
-                    </span>
-                  </p>
-                </div>
-              )
+              <ParticipantReveal
+                results={revealResults}
+                revealedCount={revealStep}
+                isHost={isCreator}
+                onAdvance={isCreator ? handleAdvanceReveal : undefined}
+              />
             ) : (
               // presentation (default)
               <Presentation

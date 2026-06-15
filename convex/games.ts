@@ -250,6 +250,31 @@ export const setVotingPhase = mutation({
     await ctx.db.patch(args.gameId, {
       votingMode: "participant",
       votingPhase: args.phase,
+      // Restart the reveal whenever we (re)enter the reveal phase.
+      revealStep: args.phase === "reveal" ? 0 : undefined,
+    });
+  },
+});
+
+// Advance the synced podium reveal (host only). `step` = how many places are
+// shown (0 = none yet, up to 3 for the full podium). Every participant's reveal
+// screen reads this value so the countdown plays in lockstep.
+export const setRevealStep = mutation({
+  args: {
+    gameId: v.id("games"),
+    creatorId: v.id("users"),
+    step: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const game = await ctx.db.get(args.gameId);
+    if (!game) {
+      throw new Error("Game not found");
+    }
+    if (game.creatorId !== args.creatorId) {
+      throw new Error("Only the creator can control the reveal");
+    }
+    await ctx.db.patch(args.gameId, {
+      revealStep: Math.max(0, Math.floor(args.step)),
     });
   },
 });
@@ -387,6 +412,7 @@ export const resetGame = mutation({
       startedAt: undefined,
       endedAt: undefined,
       votingPhase: undefined,
+      revealStep: undefined,
     });
 
     return { success: true };

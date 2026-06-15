@@ -75,19 +75,50 @@ export function ParticipantVoting({
   };
 
   const usedVotes = (firstChoice ? 1 : 0) + (secondChoice ? 1 : 0);
+  const allVotesUsed = votesAllowed > 0 && usedVotes >= votesAllowed;
+
+  const labelFor = (entryId: Id<"entries"> | null) =>
+    votableEntries.find((e) => e.entryId === entryId)?.label ?? "—";
 
   return (
     <div className="space-y-6">
-      {/* Status banner */}
-      <div className="bg-[#0a0a12] border-4 border-purple-600 p-4 flex flex-wrap items-center justify-between gap-3"
-        style={{ boxShadow: "6px 6px 0 0 #553399" }}>
-        <p className="text-[10px] font-['Press_Start_2P'] text-purple-300">
-          Pick your favourites — 🥇 1st = 2 pts, 🥈 2nd = 1 pt
-        </p>
-        <p className="text-[10px] font-['Press_Start_2P'] text-[#4ade80]">
-          {usedVotes} / {votesAllowed} votes used
-        </p>
-      </div>
+      {/* Confirmation banner once the ballot is complete */}
+      {allVotesUsed ? (
+        <div
+          className="bg-[#0a0a12] border-4 border-[#4ade80] p-5"
+          style={{ boxShadow: "6px 6px 0 0 #2d7a50" }}
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-2xl">✅</span>
+            <p className="text-[11px] font-['Press_Start_2P'] text-[#4ade80]">
+              Your votes are in!
+            </p>
+          </div>
+          <p className="text-[9px] font-['Press_Start_2P'] text-gray-400 leading-relaxed mb-3">
+            {firstChoice && (
+              <>🥇 {labelFor(firstChoice)}</>
+            )}
+            {secondChoice && (
+              <>
+                {"   "}🥈 {labelFor(secondChoice)}
+              </>
+            )}
+          </p>
+          <p className="text-[8px] font-['Press_Start_2P'] text-gray-500">
+            You can still change your picks until the host closes voting.
+          </p>
+        </div>
+      ) : (
+        <div className="bg-[#0a0a12] border-4 border-purple-600 p-4 flex flex-wrap items-center justify-between gap-3"
+          style={{ boxShadow: "6px 6px 0 0 #553399" }}>
+          <p className="text-[10px] font-['Press_Start_2P'] text-purple-300">
+            Pick your favourites — 🥇 1st = 2 pts, 🥈 2nd = 1 pt
+          </p>
+          <p className="text-[10px] font-['Press_Start_2P'] text-[#4ade80]">
+            {usedVotes} / {votesAllowed} votes used
+          </p>
+        </div>
+      )}
 
       {votableEntries.length === 0 && (
         <div className="bg-[#0a0a12] border-4 border-[#3a9364] p-8 text-center"

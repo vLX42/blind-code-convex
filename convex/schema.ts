@@ -47,6 +47,9 @@ export default defineSchema({
         v.literal("reveal")
       )
     ),
+    // How many podium places the host has revealed so far (0..3). Drives a
+    // synced reveal: every participant's screen mirrors the host's progress.
+    revealStep: v.optional(v.number()),
     startedAt: v.optional(v.number()), // Timestamp when game started
     endedAt: v.optional(v.number()), // Timestamp when game ended
   })
