@@ -21,7 +21,10 @@ export function Playback({ entryId, playerName, onClose, autoPlay = false, targe
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState<number | "auto">("auto");
-  const [showCode, setShowCode] = useState(true);
+  // Default to the rendered preview so "Watch" shows the result immediately —
+  // on screens below the lg breakpoint the side-by-side panel is hidden, so if
+  // we defaulted to code the preview would look blank until toggled.
+  const [showCode, setShowCode] = useState(false);
   const [hasAutoStarted, setHasAutoStarted] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -40,15 +43,29 @@ export function Playback({ entryId, playerName, onClose, autoPlay = false, targe
       .join("\n");
   }, [assets]);
 
-  // Wrap HTML with Google Fonts
-  const wrapWithFonts = useCallback((html: string) => {
-    if (!googleFontLinks) return html;
-    // If HTML already has <head>, inject fonts there
-    if (html.includes("<head>")) {
-      return html.replace("<head>", `<head>\n${googleFontLinks}`);
-    }
-    // Otherwise, wrap it
-    return `<!DOCTYPE html><html><head>${googleFontLinks}</head><body>${html}</body></html>`;
+  // Build the preview document. Kept consistent with the other previews
+  // (results, slideshow, voting, presentation, inline): srcDoc + <base> so
+  // relative asset refs ("/a/<code>") resolve against the app origin, a body
+  // reset, and an img guard so oversized images don't blow out the frame.
+  const renderPreview = useCallback((html: string) => {
+    const base =
+      typeof window !== "undefined"
+        ? `<base href="${window.location.origin}/">`
+        : "";
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          ${base}
+          ${googleFontLinks}
+          <style>
+            body { margin: 0; padding: 0; background: white; }
+            img { max-width: 100%; height: auto; }
+          </style>
+        </head>
+        <body>${html}</body>
+      </html>
+    `;
   }, [googleFontLinks]);
 
   // Calculate auto speed: play all snapshots in targetDuration seconds
@@ -180,10 +197,10 @@ export function Playback({ entryId, playerName, onClose, autoPlay = false, targe
           ) : (
             <div className="flex-1 bg-white">
               <iframe
-                srcDoc={wrapWithFonts(currentSnapshot?.html || "")}
+                srcDoc={renderPreview(currentSnapshot?.html || "")}
                 className="w-full h-full border-0"
                 title="Preview"
-                sandbox="allow-scripts"
+                sandbox="allow-same-origin"
               />
             </div>
           )}
@@ -193,10 +210,10 @@ export function Playback({ entryId, playerName, onClose, autoPlay = false, targe
             {showCode ? (
               <div className="flex-1 bg-white">
                 <iframe
-                  srcDoc={wrapWithFonts(currentSnapshot?.html || "")}
+                  srcDoc={renderPreview(currentSnapshot?.html || "")}
                   className="w-full h-full border-0"
                   title="Preview"
-                  sandbox="allow-scripts"
+                  sandbox="allow-same-origin"
                 />
               </div>
             ) : (
