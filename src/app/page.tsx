@@ -457,6 +457,19 @@ function CreateGameModal({ onClose }: { onClose: () => void }) {
   const [isUploadingAsset, setIsUploadingAsset] = useState(false);
   const assetFileInputRef = useRef<HTMLInputElement>(null);
 
+  // The DFDS Seaways template stays hidden until 10:15 (local time) today.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 15000);
+    return () => clearInterval(id);
+  }, []);
+  const dfdsRevealTime = (() => {
+    const d = new Date();
+    d.setHours(10, 15, 0, 0);
+    return d.getTime();
+  })();
+  const dfdsHidden = now < dfdsRevealTime;
+
   const { startUpload: startAssetUpload } = useUploadThing("gameAsset", {
     onClientUploadComplete: (res) => {
       if (res?.[0]?.url) {
@@ -710,7 +723,9 @@ function CreateGameModal({ onClose }: { onClose: () => void }) {
                     type="button"
                     onClick={() => applyTemplate(template)}
                     disabled={isSubmitting}
-                    className="bg-[#1a1a2e] border-2 border-[#3a9364] hover:border-purple-400 p-4 text-left transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={`bg-[#1a1a2e] border-2 border-[#3a9364] hover:border-purple-400 p-4 text-left transition-all group disabled:opacity-50 disabled:cursor-not-allowed ${
+                      template.id === "dfds-seaways" && dfdsHidden ? "hidden" : ""
+                    }`}
                   >
                     <div className="flex gap-4">
                       <img
