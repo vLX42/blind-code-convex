@@ -109,8 +109,13 @@ export function Presentation({
       : sortedSnapshots[snapIndex]?.html ?? "";
 
   const renderPreview = (html: string) => {
-    const doc = `<!DOCTYPE html><html><head>${googleFontLinks}<style>body{margin:0;padding:0;background:white;}</style></head><body>${html}</body></html>`;
-    return `data:text/html;charset=utf-8,${encodeURIComponent(doc)}`;
+    // srcDoc + <base> so relative asset refs ("/a/<code>") resolve against the
+    // app origin; img guard caps oversized images.
+    const base =
+      typeof window !== "undefined"
+        ? `<base href="${window.location.origin}/">`
+        : "";
+    return `<!DOCTYPE html><html><head>${base}${googleFontLinks}<style>body{margin:0;padding:0;background:white;}img{max-width:100%;height:auto;}</style></head><body>${html}</body></html>`;
   };
 
   const issue = biggestHtmlIssue(current.finalHtml);
@@ -182,7 +187,7 @@ export function Presentation({
         ) : (
           <div className="h-[58vh] bg-white">
             <iframe
-              src={renderPreview(displayHtml)}
+              srcDoc={renderPreview(displayHtml)}
               className="w-full h-full border-0"
               sandbox="allow-same-origin"
               title={current.label}

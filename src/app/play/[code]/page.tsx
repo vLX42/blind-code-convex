@@ -11,6 +11,7 @@ import { Modal } from "@/components/modal";
 import { Button } from "@/components/button";
 import { AssetRef } from "@/components/asset-ref";
 import useInterval from "@/hooks/useInterval";
+import useActiveTab from "@/hooks/useActiveTab";
 import dynamic from "next/dynamic";
 import type { EditorProps } from "@/components/editor";
 
@@ -45,6 +46,12 @@ export default function PlayPage() {
 
   const streakTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const gameStartedAtRef = useRef<number | null>(null);
+
+  // Only the active (most recently focused) tab persists progress, so a
+  // duplicate/empty tab can't overwrite the real entry. See useActiveTab.
+  const isActiveTab = useActiveTab(code);
+  const isActiveTabRef = useRef(isActiveTab);
+  isActiveTabRef.current = isActiveTab;
 
   // Check for guest player ID in localStorage
   useEffect(() => {
@@ -127,7 +134,7 @@ export default function PlayPage() {
     const remaining = Math.max(0, total - elapsed);
 
     // If time already expired when page loads, auto-submit immediately
-    if (remaining <= 0 && !isSubmitting && entry?._id) {
+    if (remaining <= 0 && !isSubmitting && entry?._id && isActiveTabRef.current) {
       handleSubmit();
       // Trigger auto-end of game
       if (game._id) {
@@ -146,8 +153,8 @@ export default function PlayPage() {
       const remaining = Math.max(0, total - elapsed);
       setTimeRemaining(remaining);
 
-      // Auto-submit when time is up
-      if (remaining <= 0 && !isSubmitting) {
+      // Auto-submit when time is up (only from the active tab)
+      if (remaining <= 0 && !isSubmitting && isActiveTabRef.current) {
         handleSubmit();
         // Trigger auto-end of game (server validates time actually expired)
         if (game._id) {
@@ -198,7 +205,7 @@ export default function PlayPage() {
 
   // Save progress snapshot periodically
   useInterval(() => {
-    if (entry?._id && game?.startedAt) {
+    if (isActiveTab && entry?._id && game?.startedAt) {
       const timestamp = Date.now() - game.startedAt;
 
       // Update entry
@@ -236,7 +243,7 @@ export default function PlayPage() {
   // Push live state often so the host's overview shows score, streak, and
   // power mode in near real time.
   useInterval(() => {
-    if (entry?._id && game?.status === "active" && !hasSubmitted) {
+    if (isActiveTab && entry?._id && game?.status === "active" && !hasSubmitted) {
       updatePlayerState({
         entryId: entry._id,
         liveScore: calculateScore(),
@@ -286,19 +293,27 @@ export default function PlayPage() {
       .map((asset) => `<link href="${asset.url}" rel="stylesheet">`)
       .join("\n") || "";
 
-    const doc = `
+    // srcDoc keeps the frame same-origin so relative asset refs ("/a/<code>")
+    // resolve; the <base> makes that explicit and the img guard caps oversized
+    // images.
+    const base =
+      typeof window !== "undefined"
+        ? `<base href="${window.location.origin}/">`
+        : "";
+    return `
       <!DOCTYPE html>
       <html>
         <head>
+          ${base}
           ${fontLinks}
           <style>
             body { margin: 0; padding: 0; background: white; }
+            img { max-width: 100%; height: auto; }
           </style>
         </head>
         <body>${htmlContent}</body>
       </html>
     `;
-    return `data:text/html;charset=utf-8,${encodeURIComponent(doc)}`;
   };
 
   // Format time
@@ -370,7 +385,7 @@ export default function PlayPage() {
               <div className="bg-[#1a1a2e] border-4 border-[#3a9364] p-2" style={{ boxShadow: '6px 6px 0 0 #2d7a50' }}>
                 <div className="aspect-video bg-white">
                   <iframe
-                    src={renderPreview(currentEntry.html || "")}
+                    srcDoc={renderPreview(currentEntry.html || "")}
                     className="w-full h-full border-0"
                     sandbox="allow-same-origin"
                     title={`Submission ${currentSlideIndex + 1}`}

@@ -88,19 +88,26 @@ export function InlinePlayback({ entryId, finalHtml, targetDuration = 8, gameId 
 
   // Render HTML in iframe
   const renderPreview = useCallback((html: string) => {
-    const doc = `
+    // srcDoc + <base> so relative asset refs ("/a/<code>") resolve against the
+    // app origin; img guard caps oversized images.
+    const base =
+      typeof window !== "undefined"
+        ? `<base href="${window.location.origin}/">`
+        : "";
+    return `
       <!DOCTYPE html>
       <html>
         <head>
+          ${base}
           ${googleFontLinks}
           <style>
             body { margin: 0; padding: 0; background: white; }
+            img { max-width: 100%; height: auto; }
           </style>
         </head>
         <body>${html}</body>
       </html>
     `;
-    return `data:text/html;charset=utf-8,${encodeURIComponent(doc)}`;
   }, [googleFontLinks]);
 
   const hasSnapshots = sortedSnapshots.length > 0;
@@ -109,7 +116,7 @@ export function InlinePlayback({ entryId, finalHtml, targetDuration = 8, gameId 
     <div className="relative aspect-video bg-white rounded-lg overflow-hidden group">
       {/* Preview iframe */}
       <iframe
-        src={renderPreview(currentHtml)}
+        srcDoc={renderPreview(currentHtml)}
         className="w-full h-full border-0"
         sandbox="allow-same-origin"
         title="Submission preview"

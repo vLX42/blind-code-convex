@@ -186,20 +186,29 @@ export default function ResultsPage() {
     );
   }
 
-  // Render HTML preview in iframe
+  // Build the preview document for an <iframe srcDoc>. Using srcDoc (instead of
+  // a data: URL) keeps the frame same-origin, so relative asset refs like
+  // "/a/<code>" resolve against the app origin. A <base> tag makes that
+  // explicit, and the img guard stops oversized/broken images blowing out the
+  // card.
   const renderPreview = (html: string) => {
-    const doc = `
+    const base =
+      typeof window !== "undefined"
+        ? `<base href="${window.location.origin}/">`
+        : "";
+    return `
       <!DOCTYPE html>
       <html>
         <head>
+          ${base}
           <style>
             body { margin: 0; padding: 0; background: white; }
+            img { max-width: 100%; height: auto; }
           </style>
         </head>
         <body>${html}</body>
       </html>
     `;
-    return `data:text/html;charset=utf-8,${encodeURIComponent(doc)}`;
   };
 
   return (
@@ -456,7 +465,7 @@ export default function ResultsPage() {
                       </div>
                       <div className="aspect-video bg-white border-4 border-[#1a1a2e] overflow-hidden mb-4">
                         <iframe
-                          src={renderPreview(entry.html || "")}
+                          srcDoc={renderPreview(entry.html || "")}
                           className="w-full h-full border-0"
                           sandbox="allow-same-origin"
                           title={`Submission by ${entry.player?.handle}`}

@@ -45,6 +45,10 @@ export const updateEntry = mutation({
     const entry = await ctx.db.get(args.entryId);
     if (!entry) throw new Error("Entry not found");
 
+    // Guard against a stray autosave from a duplicate/empty tab clobbering
+    // real work. An empty autosave over existing content is never intentional.
+    if (args.html === "" && entry.html !== "") return;
+
     // Update max streak if current is higher
     const maxStreak = Math.max(entry.maxStreak, args.streak);
 
@@ -120,8 +124,18 @@ export const submitEntry = mutation({
     totalKeystrokes: v.number(),
   },
   handler: async (ctx, args) => {
+    const entry = await ctx.db.get(args.entryId);
+    if (!entry) throw new Error("Entry not found");
+
+    // Don't let a second tab re-submit over an already-finalized entry.
+    if (entry.isSubmitted) return;
+
+    // Never finalize with an empty body when real content exists (e.g. an
+    // empty duplicate tab auto-submitting on timeout).
+    const html = args.html === "" && entry.html !== "" ? entry.html : args.html;
+
     await ctx.db.patch(args.entryId, {
-      html: args.html,
+      html,
       isSubmitted: true,
       submittedAt: Date.now(),
       totalScore: args.totalScore,
